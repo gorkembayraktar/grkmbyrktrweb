@@ -1,10 +1,10 @@
 # Personal Portfolio Website
 
-A modern and responsive portfolio website built with Next.js 13, TypeScript, and Tailwind CSS.
+A modern and responsive portfolio website built with Next.js 15, TypeScript, and Tailwind CSS.
 
 ## Features
 
-- 🚀 Built with Next.js 13 App Router
+- 🚀 Built with Next.js 15 App Router
 - 💻 Fully Responsive Design
 - 🎨 Modern UI with Tailwind CSS
 - ✨ Smooth Animations with Framer Motion
@@ -19,7 +19,7 @@ A modern and responsive portfolio website built with Next.js 13, TypeScript, and
 
 ## Tech Stack
 
-- **Framework:** Next.js 13
+- **Framework:** Next.js 15
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
 - **Animations:** Framer Motion

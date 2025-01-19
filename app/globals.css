@@ -1,0 +1,177 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --background-start: #1a1a1a;
+    --background-end: #0f0f0f;
+    --foreground: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #0a0a0a;
+        --foreground: #ededed;
+    }
+}
+
+body {
+    color: var(--foreground);
+    background: linear-gradient(to bottom,
+            var(--background-start),
+            var(--background-end));
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer components {
+    .btn-primary {
+        @apply bg-dark-darker hover:opacity-90 px-8 py-4 rounded-lg transition-all text-white font-medium border border-primary/20 hover:border-primary/40;
+    }
+
+    .btn-outline {
+        @apply bg-dark-darker border-2 border-primary/20 hover:border-primary/40 px-8 py-4 rounded-lg transition-all text-white font-medium;
+    }
+
+    .section-title {
+        @apply text-4xl font-bold text-center mb-12;
+    }
+
+    .container {
+        @apply max-w-7xl mx-auto px-4;
+    }
+}
+
+/* Smooth Scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background-end);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2a2a2a;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3a3a3a;
+}
+
+/* Animasyonlu arka plan */
+@keyframes flow {
+    0% {
+        transform: translateY(0) translateX(0);
+    }
+
+    50% {
+        transform: translateY(-15px) translateX(15px);
+    }
+
+    100% {
+        transform: translateY(0) translateX(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+.animated-background {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: -1;
+}
+
+.animated-background::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: repeating-linear-gradient(45deg,
+            transparent,
+            transparent 40px,
+            var(--foreground) 40px,
+            var(--foreground) 41px,
+            transparent 41px,
+            transparent 81px);
+    opacity: 0.1;
+    animation: flow 10s ease-in-out infinite, pulse 8s ease-in-out infinite;
+}
+
+.animated-background::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: repeating-linear-gradient(-45deg,
+            transparent,
+            transparent 40px,
+            var(--foreground) 40px,
+            var(--foreground) 41px,
+            transparent 41px,
+            transparent 81px);
+    opacity: 0.1;
+    animation: flow 10s ease-in-out infinite reverse, pulse 8s ease-in-out infinite reverse;
+}
+
+/* Gradient overlay */
+.gradient-overlay {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center,
+            transparent 0%,
+            var(--background-start) 40%,
+            var(--background-end) 100%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Gradient background */
+.gradient-bg {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg,
+            var(--background-start),
+            var(--background-end),
+            var(--background-start));
+    background-size: 400% 400%;
+    animation: gradientBg 15s ease infinite;
+    z-index: -2;
+}
+
+@keyframes gradientBg {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Işıltı efekti */
+.animated-background::before,
+.animated-background::after {
+    mask-image: radial-gradient(circle at center,
+            black,
+            transparent 80%);
+}

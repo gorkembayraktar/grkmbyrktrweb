@@ -6,7 +6,7 @@ import type { FC, ReactNode } from 'react'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Görkem Bayraktar - Web & Mobil Yazılım Çözümleri',
+  title: 'Görkem Bayraktar - Web Yazılım Çözümleri',
   description: 'Next.js, React Native ve modern teknolojilerle web ve mobil çözümler',
 }
 

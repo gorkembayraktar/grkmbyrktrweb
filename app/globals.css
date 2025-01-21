@@ -2,10 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Varsayılan dark mode */
 :root {
+    color-scheme: dark;
     --background-start: #1a1a1a;
     --background-end: #0f0f0f;
     --foreground: #ffffff;
+}
+
+:root[class~="dark"] {
+    color-scheme: dark;
+    --background-start: #1a1a1a;
+    --background-end: #0f0f0f;
+    --foreground: #ffffff;
+}
+
+:root:not([class~="dark"]) {
+    color-scheme: light;
+    --background-start: #ffffff;
+    --background-end: #f3f4f6;
+    --foreground: #1a1a1a;
+}
+
+html {
+    @apply scroll-smooth;
+}
+
+html.dark {
+    color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {

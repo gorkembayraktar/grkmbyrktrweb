@@ -1,7 +1,8 @@
 import { Inter } from 'next/font/google'
 import './globals.css'
 import type { Metadata } from 'next'
-import type { FC, ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import ClientLayout from './components/ClientLayout'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,32 +15,10 @@ interface RootLayoutProps {
   children: ReactNode
 }
 
-const RootLayout: FC<RootLayoutProps> = ({ children }) => {
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="tr" className="scroll-smooth dark">
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var theme = localStorage.getItem('theme') ?? 'dark';
-                  if (theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
-                } catch (e) {
-                  document.documentElement.classList.add('dark');
-                }
-              })();
-            `,
-          }}
-        />
-      </head>
-      <body className={inter.className}>{children}</body>
-    </html>
+    <ClientLayout inter={inter}>
+      {children}
+    </ClientLayout>
   )
 }
-
-export default RootLayout

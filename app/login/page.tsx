@@ -34,6 +34,7 @@ function LoginForm() {
                 }
             })
 
+
             if (error) throw error
 
             if (data?.url) {

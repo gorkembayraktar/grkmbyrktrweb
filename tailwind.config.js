@@ -4,6 +4,7 @@ module.exports = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/components/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -14,6 +15,11 @@ module.exports = {
           light: "#2a2a2a",
           darker: "#0f0f0f"
         },
+        light: {
+          DEFAULT: "#ffffff",
+          dark: "#f3f4f6",
+          darker: "#e5e7eb"
+        }
       },
       backgroundImage: {
         'accent-gradient': 'linear-gradient(45deg, #2563eb, #0ea5e9)',

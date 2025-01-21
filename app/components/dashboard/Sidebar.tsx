@@ -46,14 +46,12 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
         },
         { icon: FaProjectDiagram, label: 'Projeler', path: '/dashboard/projects' },
         { icon: FaUsers, label: 'Kullanıcılar', path: '/dashboard/users' },
-        { icon: FaChartBar, label: 'İstatistikler', path: '/dashboard/stats' },
         {
             icon: FaCog,
             label: 'Ayarlar',
             path: '/dashboard/settings',
             subItems: [
                 { icon: FaSlidersH, label: 'Genel', path: '/dashboard/settings/general' },
-                { icon: FaWrench, label: 'Gelişmiş', path: '/dashboard/settings/advanced' },
                 { icon: FaEnvelope, label: 'Mail', path: '/dashboard/settings/mail' },
             ]
         }

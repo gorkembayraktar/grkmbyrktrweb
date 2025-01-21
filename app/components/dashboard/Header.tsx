@@ -77,7 +77,7 @@ export default function Header({ user, isCollapsed, setIsCollapsed }: HeaderProp
                     >
                         {isCollapsed ? <FaBars className="text-gray-600 dark:text-gray-400 text-sm md:text-base" /> : <FaTimes className="text-gray-600 dark:text-gray-400 text-sm md:text-base" />}
                     </button>
-                    <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">Dashboard</h2>
+
                 </div>
 
                 <div className="flex items-center gap-4">

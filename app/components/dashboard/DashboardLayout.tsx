@@ -37,30 +37,7 @@ export default function DashboardLayout({ user, children }: DashboardLayoutProps
                         animate={{ opacity: 1 }}
                         className="p-6"
                     >
-                        {/* Dashboard Card Container */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                            {/* İstatistik Kartları */}
-                            <div className="bg-white dark:bg-dark-light rounded-lg shadow-sm border border-light-darker/10 dark:border-dark-light/10 p-6">
-                                <h3 className="text-lg font-semibold mb-2">Toplam Yazı</h3>
-                                <p className="text-3xl font-bold text-primary">150</p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Son 30 günde +12 yazı</p>
-                            </div>
-                            <div className="bg-white dark:bg-dark-light rounded-lg shadow-sm border border-light-darker/10 dark:border-dark-light/10 p-6">
-                                <h3 className="text-lg font-semibold mb-2">Toplam Görüntülenme</h3>
-                                <p className="text-3xl font-bold text-primary">25.4K</p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Son 30 günde +2.1K görüntülenme</p>
-                            </div>
-                            <div className="bg-white dark:bg-dark-light rounded-lg shadow-sm border border-light-darker/10 dark:border-dark-light/10 p-6">
-                                <h3 className="text-lg font-semibold mb-2">Aktif Kullanıcı</h3>
-                                <p className="text-3xl font-bold text-primary">1.2K</p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Son 30 günde +180 kullanıcı</p>
-                            </div>
-                        </div>
-
-                        {/* Content Area */}
-                        <div className="bg-white dark:bg-dark-light rounded-lg shadow-sm border border-light-darker/10 dark:border-dark-light/10 p-6">
-                            {children}
-                        </div>
+                        {children}
                     </motion.div>
                 </main>
             </div>

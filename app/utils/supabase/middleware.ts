@@ -14,7 +14,7 @@ export async function updateSession(request: NextRequest) {
             if (!user) {
                 return NextResponse.redirect(new URL('/login', request.url))
             }
-            if (user?.email === process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL) {
+            if (user?.email === process.env.AUTHORIZED_EMAIL) {
                 return NextResponse.redirect(new URL('/dashboard', request.url))
             }
         }
@@ -45,7 +45,7 @@ export async function updateSession(request: NextRequest) {
             return NextResponse.redirect(redirectUrl)
         }
 
-        if (requestUrl.pathname.startsWith('/dashboard') && user?.email !== process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL) {
+        if (requestUrl.pathname.startsWith('/dashboard') && user?.email !== process.env.AUTHORIZED_EMAIL) {
             return NextResponse.redirect(new URL('/auth/auth-unauthorized', request.url))
         }
 

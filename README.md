@@ -48,6 +48,14 @@ A modern and responsive portfolio website built with Next.js 15, TypeScript, and
 │   └── globals.css
 └── package.json
 ```
+## Environment Setup
+
+1. `.env.example` dosyasını `.env.local` olarak kopyalayın:
+```bash
+cp .env.example .env.local
+```
+
+
 
 ## Getting Started
 
@@ -62,6 +70,7 @@ npm install
 # or
 yarn install
 ```
+
 
 3. Run the development server:
 ```bash

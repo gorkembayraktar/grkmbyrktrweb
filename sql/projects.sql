@@ -58,4 +58,5 @@ create policy "Authenticated users can delete projects"
     on public.projects
     for delete
     to authenticated
-    using (true); 
+    using (true);
+

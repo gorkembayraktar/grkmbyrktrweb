@@ -16,7 +16,6 @@ export default function Header({ user, isCollapsed, setIsCollapsed }: HeaderProp
     const [isDarkTheme, setIsDarkTheme] = useState(true)
     const menuRef = useRef<HTMLDivElement>(null)
     const supabase = createClient()
-
     // Theme durumunu kontrol et ve uygula
     useEffect(() => {
         // localStorage'dan theme durumunu al, yoksa dark theme kullan
@@ -95,7 +94,7 @@ export default function Header({ user, isCollapsed, setIsCollapsed }: HeaderProp
                                 <FaUser className="text-primary" />
                             </div>
                             <div className="hidden md:block text-left">
-                                <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.email}</p>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.user_metadata.name}</p>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">Admin</p>
                             </div>
                         </button>

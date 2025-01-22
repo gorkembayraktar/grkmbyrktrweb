@@ -1,5 +1,5 @@
 'use client'
-import type { ReactNode } from 'react'
+import { ReactNode } from 'react'
 import { useEffect } from 'react'
 import type { NextFont } from 'next/dist/compiled/@next/font'
 
@@ -17,11 +17,28 @@ export default function ClientLayout({ children, inter }: ClientLayoutProps) {
         } else {
             document.documentElement.classList.add('dark')
         }
+
+        // Tema değişikliklerini dinle
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    const isDark = document.documentElement.classList.contains('dark')
+                    localStorage.setItem('theme', isDark ? 'dark' : 'light')
+                }
+            })
+        })
+
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class']
+        })
+
+        return () => observer.disconnect()
     }, [])
 
     return (
-        <html lang="tr" className="scroll-smooth" suppressHydrationWarning>
-            <body className={inter.className}>{children}</body>
-        </html>
+        <div className={inter.className}>
+            {children}
+        </div>
     )
 } 

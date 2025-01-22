@@ -36,7 +36,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
         { icon: FaHome, label: 'Ana Sayfa', path: '/dashboard' },
         {
             icon: FaNewspaper,
-            label: 'Blog Yönetimi',
+            label: 'Blog',
             path: '/dashboard/blog',
             subItems: [
                 { icon: FaList, label: 'Yazılar', path: '/dashboard/blog/posts' },

@@ -28,7 +28,7 @@ export async function updateSession(request: NextRequest) {
         }
 
         // Public routes - her zaman erişilebilir
-        const publicUrls = ['/auth', '/api']
+        const publicUrls = ['/auth', '/api', '/blog']
         const isPublicRoute = publicUrls.some(url => requestUrl.pathname.startsWith(url))
 
         if (isPublicRoute) {

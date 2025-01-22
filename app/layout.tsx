@@ -11,14 +11,14 @@ export const metadata: Metadata = {
   description: 'Next.js, React Native ve modern teknolojilerle web ve mobil çözümler',
 }
 
-interface RootLayoutProps {
-  children: ReactNode
-}
-
-export default function RootLayout({ children }: RootLayoutProps) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <ClientLayout inter={inter}>
-      {children}
-    </ClientLayout>
+    <html lang="tr" className="scroll-smooth" suppressHydrationWarning>
+      <body>
+        <ClientLayout inter={inter}>
+          {children}
+        </ClientLayout>
+      </body>
+    </html>
   )
 }

@@ -309,10 +309,10 @@ export default function ProjectsPage() {
 
             <DeleteConfirmModal
                 isOpen={showDeleteModal}
-                onClose={handleCloseDeleteModal}
+                onCancel={handleCloseDeleteModal}
                 onConfirm={handleDeleteConfirm}
                 title={selectedProject?.title || ''}
-                isDeleting={isDeleting}
+                message="Bu proje silinecektir. Emin misiniz?"
             />
         </div>
     )

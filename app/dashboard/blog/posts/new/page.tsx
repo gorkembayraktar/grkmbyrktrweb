@@ -362,7 +362,7 @@ export default function NewPostPage() {
                                     <div className="flex flex-wrap gap-2 mb-2 pb-2 border-b border-gray-200 dark:border-gray-700">
                                         <select
                                             onChange={(e) => {
-                                                const level = parseInt(e.target.value)
+                                                const level = parseInt(e.target.value) as 1 | 2 | 3 | 4 | 5 | 6
                                                 level ? editor?.chain().focus().toggleHeading({ level }).run()
                                                     : editor?.chain().focus().setParagraph().run()
                                             }}

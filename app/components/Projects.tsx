@@ -4,6 +4,12 @@ import type { FC } from 'react'
 
 const projects = [
     {
+        title: "Gelişmiş QR Menu",
+        description: "Modern ve kullanıcı dostu bir QR menü yönetim sistemi. Restoranlar için dijital menü oluşturma ve yönetme imkanı sunar.",
+        image: "https://raw.githubusercontent.com/gorkembayraktar/qrmenu/main/doc/homepage.png",
+        link: "https://qrmenu.gorkembayraktar.com/"
+    },
+    {
         title: "Speed Test App",
         description: "İnternet bağlantı hızınızı test edebileceğiniz modern bir web uygulaması. Next.js ile geliştirilmiş, hızlı ve kullanıcı dostu arayüz.",
         image: "/images/speedtest.png",
@@ -113,7 +119,7 @@ const Projects: FC = () => {
                         ))}
 
                         {/* Project Skeletons with Overlay */}
-                        {[1, 2, 3].map((i) => (
+                        {[1, 2].map((i) => (
                             <motion.div
                                 key={i}
                                 initial={{ opacity: 0, y: 20 }}

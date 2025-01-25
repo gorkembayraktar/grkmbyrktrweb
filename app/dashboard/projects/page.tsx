@@ -312,7 +312,8 @@ export default function ProjectsPage() {
                 onCancel={handleCloseDeleteModal}
                 onConfirm={handleDeleteConfirm}
                 title={selectedProject?.title || ''}
-                message="Bu proje silinecektir. Emin misiniz?"
+                message={`"${selectedProject?.title}" projesini silmek istediğinize emin misiniz?`}
+                isLoading={isDeleting}
             />
         </div>
     )

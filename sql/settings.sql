@@ -39,4 +39,11 @@ $$ language plpgsql;
 create trigger handle_updated_at
     before update on public.settings
     for each row
-    execute function public.handle_updated_at(); 
+    execute function public.handle_updated_at();
+
+-- WhatsApp modülü için varsayılan ayarlar
+insert into public.settings (key, value) 
+values (
+    'module_whatsapp',
+    '{"phone":"","default_message":"","is_active":false,"position":"bottom-right","size":"medium","margin_x":18,"margin_y":86,"show_mobile":true}'
+) on conflict (key) do nothing; 

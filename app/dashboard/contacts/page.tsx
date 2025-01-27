@@ -166,7 +166,7 @@ export default function ContactsPage() {
                     <div>
                         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                             <FaEnvelope className="h-6 w-6 text-primary" />
-                            İletişim Formları
+                            Gelen Kutusu
                         </h1>
                         <div className="mt-1 flex items-center gap-4">
                             <span className="text-sm text-gray-500 dark:text-gray-400">

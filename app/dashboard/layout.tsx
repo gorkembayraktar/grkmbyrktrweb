@@ -25,7 +25,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     return (
         <>
-            <Toaster position="top-right" />
+            <Toaster position="bottom-left" />
             <DashboardLayout user={userData}>
                 {children}
             </DashboardLayout>

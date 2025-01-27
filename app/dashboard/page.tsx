@@ -7,6 +7,7 @@ import { FaEnvelope, FaProjectDiagram, FaUsers, FaUser, FaNewspaper, FaEye, FaSt
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { getTotalPageViews } from '../utils/views'
+import Link from 'next/link'
 
 interface DashboardStats {
     totalContacts: number
@@ -247,10 +248,17 @@ export default function DashboardPage() {
                                         <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
                                             Toplam Görüntülenme
                                         </dt>
-                                        <dd className="flex items-baseline">
+                                        <dd className="flex items-baseline justify-between">
                                             <div className="text-2xl font-semibold text-gray-900 dark:text-white">
                                                 {stats.totalViews}
                                             </div>
+                                            <Link
+                                                href="/dashboard/view-stats"
+                                                className="ml-4 inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors dark:bg-blue-900 dark:text-blue-200"
+                                            >
+                                                Detayları Gör
+                                                <FaEye className="h-4 w-4" />
+                                            </Link>
                                         </dd>
                                     </dl>
                                 </div>

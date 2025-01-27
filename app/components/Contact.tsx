@@ -1,9 +1,10 @@
 'use client'
 import { motion } from 'framer-motion'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { PatternFormat } from 'react-number-format'
 import { FaPaperPlane } from 'react-icons/fa'
-import type { FC } from 'react'
+import { FC, useState } from 'react'
+import ResultModal from './ResultModal'
 
 interface FormInputs {
     name: string
@@ -13,16 +14,57 @@ interface FormInputs {
 }
 
 const Contact: FC = () => {
-    const { register, handleSubmit, formState: { errors }, control } = useForm<FormInputs>({
+    const { register, handleSubmit, formState: { errors, isSubmitting }, control, reset } = useForm<FormInputs>({
         defaultValues: {
             phone: '+90'
-        }
-    })
+        },
+        mode: 'onSubmit'
+    });
 
-    const onSubmit = (data: FormInputs) => {
-        console.log(data)
-        // Form gönderme işlemleri burada yapılacak
-    }
+    const [resultModal, setResultModal] = useState<{
+        isOpen: boolean;
+        type: 'success' | 'error';
+        title: string;
+        message: string;
+    }>({
+        isOpen: false,
+        type: 'success',
+        title: '',
+        message: ''
+    });
+
+    const onSubmit = async (data: FormInputs) => {
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const result = await response.json();
+                throw new Error(result.error || 'Bir hata oluştu');
+            }
+
+            reset();
+            setResultModal({
+                isOpen: true,
+                type: 'success',
+                title: 'Mesajınız İletildi!',
+                message: 'En kısa sürede size dönüş yapacağız.'
+            });
+        } catch (error: any) {
+            console.error('Submit error:', error);
+            setResultModal({
+                isOpen: true,
+                type: 'error',
+                title: 'Hata Oluştu!',
+                message: error.message || 'Mesajınız gönderilirken bir hata oluştu'
+            });
+        }
+    };
 
     return (
         <section id="contact" className="py-20">
@@ -113,12 +155,32 @@ const Contact: FC = () => {
 
                             <div>
                                 <label className="block text-sm font-medium mb-2">Telefon</label>
-                                <PatternFormat
-                                    format="+90 (###) ### ## ##"
-                                    mask="_"
-                                    className="w-full px-4 py-2 rounded-lg bg-dark border border-dark-light focus:border-primary outline-none transition-all focus:shadow-[0_0_15px_rgba(0,122,255,0.25)]"
-                                    placeholder="+90 (___) ___ __ __"
+                                <Controller
+                                    name="phone"
+                                    control={control}
+                                    rules={{
+                                        required: "Telefon alanı zorunludur",
+                                        pattern: {
+                                            value: /^\+\d{1,4} \(\d{3}\) \d{3} \d{2} \d{2}$/,
+                                            message: "Geçerli bir telefon numarası giriniz"
+                                        }
+                                    }}
+                                    render={({ field: { onChange, value } }) => (
+                                        <PatternFormat
+                                            format="+## (###) ### ## ##"
+                                            mask="_"
+                                            value={value}
+                                            onValueChange={(values) => {
+                                                onChange(values.formattedValue)
+                                            }}
+                                            className="w-full px-4 py-2 rounded-lg bg-dark border border-dark-light focus:border-primary outline-none transition-all focus:shadow-[0_0_15px_rgba(0,122,255,0.25)]"
+                                            placeholder="+90 (___) ___ __ __"
+                                        />
+                                    )}
                                 />
+                                {errors.phone && (
+                                    <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+                                )}
                             </div>
 
                             <div>
@@ -141,17 +203,40 @@ const Contact: FC = () => {
 
                             <button
                                 type="submit"
-                                className="w-full py-3 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 transition-colors hover:shadow-[0_0_15px_rgba(0,122,255,0.25)] flex items-center justify-center gap-2"
+                                disabled={isSubmitting}
+                                className={`w-full py-3 rounded-lg bg-primary text-white font-medium transition-colors hover:shadow-[0_0_15px_rgba(0,122,255,0.25)] flex items-center justify-center gap-2
+                                    ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:bg-primary/90'}`}
                             >
-                                <FaPaperPlane className="text-lg" />
-                                Gönder
+                                {isSubmitting ? (
+                                    <>
+                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Gönderiliyor...
+                                    </>
+                                ) : (
+                                    <>
+                                        <FaPaperPlane className="text-lg" />
+                                        Gönder
+                                    </>
+                                )}
                             </button>
                         </form>
                     </motion.div>
                 </motion.div>
             </div>
-        </section>
-    )
-}
 
-export default Contact 
+            {/* Sonuç Modalı */}
+            <ResultModal
+                isOpen={resultModal.isOpen}
+                onClose={() => setResultModal(prev => ({ ...prev, isOpen: false }))}
+                type={resultModal.type}
+                title={resultModal.title}
+                message={resultModal.message}
+            />
+        </section>
+    );
+};
+
+export default Contact; 

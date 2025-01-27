@@ -12,6 +12,7 @@ import Whatsapp from './modules/Whatsapp'
 import { adminClient } from './utils/supabase/server'
 import { GeneralSettings, Project, Settings, WhatsAppSettings } from './types'
 import type { Metadata } from 'next'
+import { getSettings } from './utils/settings'
 
 const Home: FC = async () => {
     const supabase = await adminClient();
@@ -29,7 +30,7 @@ const Home: FC = async () => {
     }
 
     // WhatsApp ayarlarını parse et
-    let whatsapp = settings?.module_whatsapp?.value;
+    let whatsapp = settings?.module_whatsapp;
     if (whatsapp) {
         try {
             whatsapp = JSON.parse(whatsapp) as WhatsAppSettings;
@@ -37,7 +38,6 @@ const Home: FC = async () => {
             console.error('Error parsing WhatsApp settings:', error);
         }
     }
-
 
     return (
         <main>
@@ -55,33 +55,8 @@ const Home: FC = async () => {
     );
 };
 
-const ArrayToObjectSettings = (array: any): GeneralSettings => {
-    return array.reduce((acc: any, item: any) => {
-        acc[item.key] = item.value;
-        return acc;
-    }, {}) as GeneralSettings;
-}
 
-let settingsObject: GeneralSettings | null = null;
 
-const getSettings = async (): Promise<GeneralSettings> => {
-    if (settingsObject) return settingsObject;
-
-    const supabase = await adminClient();
-    const { data: settings, error: settingsError } = await supabase
-        .from('settings')
-        .select('*');
-
-    if (settingsError) {
-        console.error('Error fetching settings:', settingsError);
-    }
-
-    const obj = ArrayToObjectSettings(settings || []);
-
-    settingsObject = obj;
-
-    return obj;
-}
 
 
 export async function generateMetadata(): Promise<Metadata> {

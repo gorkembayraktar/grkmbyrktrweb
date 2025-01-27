@@ -7,6 +7,8 @@ import Footer from '../../components/Footer'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
+import Whatsapp from '@/app/modules/Whatsapp'
+
 // Örnek son yazılar verisi
 const recentPosts = [
     {
@@ -79,7 +81,18 @@ const blogPost = {
     authorImage: "/images/author.jpg"
 }
 
-const BlogDetailPage: FC = () => {
+const BlogDetailPage: FC = async () => {
+    const settings = {
+        module_whatsapp: null,
+        title: "Görkem Bayraktar",
+        name: "Görkem Bayraktar",
+        description: "Görkem Bayraktar",
+        keywords: "Görkem Bayraktar",
+        contact_email: "gorkem@bayraktar.com",
+        contact_phone: "5555555555",
+        contact_address: "1234567890",
+        footer_copyright: "Görkem Bayraktar",
+    }
     const [tableOfContents, setTableOfContents] = useState<Array<{ id: string, title: string, level: number }>>([])
     const [activeSection, setActiveSection] = useState<string>("")
 
@@ -123,7 +136,7 @@ const BlogDetailPage: FC = () => {
 
     return (
         <>
-            <Navbar />
+            <Navbar settings={settings} />
             <main className="pt-32 pb-20">
                 <div className="container">
                     <div className="flex flex-col lg:flex-row gap-8">
@@ -356,7 +369,7 @@ const BlogDetailPage: FC = () => {
                     </div>
                 </div>
             </main>
-            <Footer />
+            <Footer settings={settings} />
         </>
     )
 }

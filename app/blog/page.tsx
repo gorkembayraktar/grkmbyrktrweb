@@ -35,10 +35,22 @@ const blogPosts = [
 
 const categories = ["Tümü", "Teknoloji", "SEO", "Veritabanı", "Web Geliştirme"]
 
+const settings = {
+    module_whatsapp: null,
+    title: "Görkem Bayraktar",
+    name: "Görkem Bayraktar",
+    description: "Görkem Bayraktar",
+    keywords: "Görkem Bayraktar",
+    contact_email: "gorkem@bayraktar.com",
+    contact_phone: "5555555555",
+    contact_address: "1234567890",
+    footer_copyright: "Görkem Bayraktar",
+}
+
 const BlogPage: FC = () => {
     return (
         <>
-            <Navbar />
+            <Navbar settings={settings} />
             <main className="pt-32 pb-20">
                 <div className="container">
                     <motion.div
@@ -168,7 +180,7 @@ const BlogPage: FC = () => {
                     </motion.div>
                 </div>
             </main>
-            <Footer />
+            <Footer settings={settings} />
         </>
     )
 }

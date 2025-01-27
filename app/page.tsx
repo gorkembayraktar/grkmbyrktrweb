@@ -8,6 +8,7 @@ import Footer from './components/Footer'
 import PhpSolutions from './components/PhpSolutions'
 import Blog from './components/Blog'
 import type { FC } from 'react'
+import Whatsapp from './modules/Whatsapp'
 
 const Home: FC = () => {
     return (
@@ -21,6 +22,7 @@ const Home: FC = () => {
             <Blog />
             <Contact />
             <Footer />
+            <Whatsapp />
         </main>
     )
 }

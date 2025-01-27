@@ -46,6 +46,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
         },
         { icon: FaProjectDiagram, label: 'Projeler', path: '/dashboard/projects' },
         { icon: FaUsers, label: 'Kullanıcılar', path: '/dashboard/users' },
+        { icon: FaEnvelope, label: 'İletişim Formları', path: '/dashboard/contacts' },
         {
             icon: FaCog,
             label: 'Ayarlar',

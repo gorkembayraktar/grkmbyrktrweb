@@ -5,7 +5,7 @@ import { createClient } from '@/app/utils/supabase/client'
 import { toast } from 'react-hot-toast'
 import { format, formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
-import { FaSearch, FaEnvelope, FaEnvelopeOpen, FaPhone, FaUser, FaFilter, FaTimes, FaTrash } from 'react-icons/fa'
+import { FaSearch, FaEnvelope, FaEnvelopeOpen, FaPhone, FaUser, FaFilter, FaTimes, FaTrash, FaEdit } from 'react-icons/fa'
 import { useRouter } from 'next/navigation'
 import { useDebounce } from 'use-debounce'
 
@@ -179,6 +179,14 @@ export default function ContactsPage() {
                             </span>
                         </div>
                     </div>
+
+                    <button
+                        onClick={() => router.push('/dashboard/contacts/template')}
+                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors"
+                    >
+                        <FaEdit className="mr-2 h-4 w-4" />
+                        Mail Şablonu Düzenle
+                    </button>
                 </div>
 
                 {/* Filtreler */}

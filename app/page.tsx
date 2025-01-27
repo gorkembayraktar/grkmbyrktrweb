@@ -11,18 +11,12 @@ import type { FC } from 'react'
 import Whatsapp from './modules/Whatsapp'
 import { adminClient } from './utils/supabase/server'
 import { GeneralSettings, Project, Settings, WhatsAppSettings } from './types'
+import type { Metadata } from 'next'
 
 const Home: FC = async () => {
     const supabase = await adminClient();
 
-    // Settings'leri çek
-    const { data: settings, error: settingsError } = await supabase
-        .from('settings')
-        .select('*');
-
-    if (settingsError) {
-        console.error('Error fetching settings:', settingsError);
-    }
+    const settings = await getSettings();
 
     // Projects'leri çek
     const { data: projects, error: projectsError } = await supabase
@@ -35,7 +29,7 @@ const Home: FC = async () => {
     }
 
     // WhatsApp ayarlarını parse et
-    let whatsapp = settings?.find(s => s.key === 'module_whatsapp')?.value;
+    let whatsapp = settings?.module_whatsapp?.value;
     if (whatsapp) {
         try {
             whatsapp = JSON.parse(whatsapp) as WhatsAppSettings;
@@ -44,11 +38,10 @@ const Home: FC = async () => {
         }
     }
 
-    const settingsObject = ArrayToObjectSettings(settings);
 
     return (
         <main>
-            <Navbar />
+            <Navbar settings={settings} />
             <Hero />
             <PhpSolutions />
             <Services />
@@ -56,18 +49,74 @@ const Home: FC = async () => {
             <Projects projects={projects as Project[]} />
             <Blog />
             <Contact />
-            <Footer settings={settingsObject} />
+            <Footer settings={settings} />
             <Whatsapp settings={whatsapp} />
         </main>
     );
 };
 
-
-const ArrayToObjectSettings = (array: any) => {
+const ArrayToObjectSettings = (array: any): GeneralSettings => {
     return array.reduce((acc: any, item: any) => {
         acc[item.key] = item.value;
         return acc;
     }, {}) as GeneralSettings;
+}
+
+let settingsObject: GeneralSettings | null = null;
+
+const getSettings = async (): Promise<GeneralSettings> => {
+    if (settingsObject) return settingsObject;
+
+    const supabase = await adminClient();
+    const { data: settings, error: settingsError } = await supabase
+        .from('settings')
+        .select('*');
+
+    if (settingsError) {
+        console.error('Error fetching settings:', settingsError);
+    }
+
+    const obj = ArrayToObjectSettings(settings || []);
+
+    settingsObject = obj;
+
+    return obj;
+}
+
+
+export async function generateMetadata(): Promise<Metadata> {
+    const settingsObject = await getSettings();
+
+    return {
+        title: settingsObject.title || 'Görkem Bayraktar - Web Yazılım Çözümleri',
+        description: settingsObject.description || 'Next.js, React Native ve modern teknolojilerle web ve mobil çözümler',
+        keywords: settingsObject.keywords || 'web,yazılım,nextjs,react native,mobil uygulama',
+        authors: [{ name: 'Görkem Bayraktar' }],
+        openGraph: {
+            title: settingsObject.title,
+            description: settingsObject.description,
+            url: 'https://gorkembayraktar.com',
+            siteName: settingsObject.title,
+            locale: 'tr_TR',
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: settingsObject.title,
+            description: settingsObject.description
+        },
+        robots: {
+            index: true,
+            follow: true,
+        },
+        manifest: '/manifest.json',
+        icons: {
+            icon: '/favicon.ico',
+            apple: [
+                { url: '/favicon.ico' },
+            ],
+        },
+    };
 }
 
 export default Home; 

@@ -12,6 +12,7 @@ export default function GeneralSettingsPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [settings, setSettings] = useState<GeneralSettings>({
         title: '',
+        name: '',
         description: '',
         keywords: '',
         contact_email: '',
@@ -33,7 +34,7 @@ export default function GeneralSettingsPage() {
                 .from('settings')
                 .select('key, value')
                 .in('key', [
-                    'title', 'description', 'keywords',
+                    'title', 'name', 'description', 'keywords',
                     'contact_email', 'contact_phone', 'contact_address',
                     'footer_copyright'
                 ])
@@ -115,6 +116,28 @@ export default function GeneralSettingsPage() {
                                         value={settings.title}
                                         onChange={handleChange}
                                         placeholder="Sitenizin başlığını girin"
+                                        className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg 
+                                                 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary 
+                                                 dark:focus:ring-primary/30 dark:focus:border-primary dark:text-white
+                                                 placeholder-gray-400 dark:placeholder-gray-500 transition-colors duration-200"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Site Adı
+                                </label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <FaHeading className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={settings.name}
+                                        onChange={handleChange}
+                                        placeholder="Sitenizin adını girin"
                                         className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg 
                                                  bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary/20 focus:border-primary 
                                                  dark:focus:ring-primary/30 dark:focus:border-primary dark:text-white

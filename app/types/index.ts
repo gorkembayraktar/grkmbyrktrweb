@@ -15,12 +15,14 @@ export interface Settings {
 
 export interface GeneralSettings {
     title: string
+    name: string
     description: string
     keywords: string
     contact_email: string
     contact_phone: string
     contact_address: string
     footer_copyright: string
+    [key: string]: any;
 }
 
 export interface WhatsAppSettings {

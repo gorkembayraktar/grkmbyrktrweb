@@ -6,8 +6,9 @@ import ContactModal from './ContactModal'
 import type { FC } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import type { GeneralSettings } from '../types'
 
-const Navbar: FC = () => {
+const Navbar: FC<{ settings: GeneralSettings }> = ({ settings }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [show, setShow] = useState(false)
@@ -53,7 +54,7 @@ const Navbar: FC = () => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                             >
-                                Görkem Bayraktar
+                                {settings.name}
                             </motion.span>
                         </Link>
 

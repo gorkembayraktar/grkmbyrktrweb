@@ -1,8 +1,19 @@
-import { type NextRequest } from 'next/server'
-import { updateSession } from '@/app/utils/supabase/middleware'
+import { type NextRequest, NextResponse } from 'next/server'
+import { updateSession, incrementViewCount } from '@/app/utils/supabase/middleware'
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 
 export async function middleware(request: NextRequest) {
-    return await updateSession(request)
+    // Auth session update
+    const response = await updateSession(request)
+
+    // If response is a redirect, return it immediately
+    if (response instanceof NextResponse && response.headers.get('Location')) {
+        return response
+    }
+
+    await incrementViewCount({ request, response });
+
+    return response
 }
 
 export const config = {

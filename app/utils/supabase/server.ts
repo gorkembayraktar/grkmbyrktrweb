@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr';
+import { createBrowserClient, createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
 export const createClient = async () => {
@@ -26,4 +26,12 @@ export const createClient = async () => {
             },
         }
     )
-} 
+}
+
+
+export const adminClient = async () => {
+    return createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+}

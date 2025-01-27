@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createClient } from './server'
+import { adminClient, createClient } from './server'
+import { UAParser } from 'ua-parser-js'
+
 
 export async function updateSession(request: NextRequest) {
     try {
@@ -53,5 +55,53 @@ export async function updateSession(request: NextRequest) {
     } catch (e) {
         console.error('Middleware error:', e)
         return NextResponse.next()
+    }
+}
+
+
+export async function incrementViewCount({ request, response }: { request: NextRequest, response: NextResponse }) {
+    const supabase = await adminClient();
+    const path = request.nextUrl.pathname
+
+    if (path.startsWith('/projects/') || path.startsWith('/blog/')) {
+        try {
+            // Get user agent info
+            const userAgent = request.headers.get('user-agent') || '';
+            const parser = new UAParser(userAgent);
+
+            // Get IP and location info
+            const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || '';
+            const language = request.headers.get('accept-language')?.split(',')[0] || '';
+            const referrer = request.headers.get('referer') || '';
+
+            // Parse user agent
+            const browser = parser.getBrowser().name || '';
+            const os = parser.getOS().name || '';
+            const device = parser.getDevice().type || 'desktop';
+            const isMobile = device === 'mobile' || device === 'tablet';
+
+            // Get location info from IP
+            let country = '', city = '';
+
+            await supabase
+                .from('views')
+                .insert([{
+                    page_path: path,
+                    view_count: 1,
+                    ip_address: ip,
+                    user_agent: userAgent,
+                    device_type: device,
+                    browser: browser,
+                    os: os,
+                    language: language,
+                    referrer: referrer,
+                    is_mobile: isMobile,
+                    country: country,
+                    city: city
+                }])
+
+        } catch (error) {
+            console.error('Error tracking page view:', error)
+        }
     }
 }

@@ -14,6 +14,9 @@ create table if not exists public.contacts (
 -- Enable RLS
 alter table public.contacts enable row level security;
 
+-- Enable realtime for contacts table
+alter publication supabase_realtime add table contacts;
+
 -- Create policies
 create policy "Enable read access for authenticated users" on public.contacts
     for select

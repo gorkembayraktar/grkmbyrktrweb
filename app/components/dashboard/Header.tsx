@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { FaBell, FaUser, FaSignOutAlt, FaCog, FaBars, FaTimes, FaMoon, FaSun } from 'react-icons/fa'
 import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/app/utils/supabase/client'
+import Notification from './Notification'
 
 interface HeaderProps {
     user: User | null
@@ -80,10 +81,8 @@ export default function Header({ user, isCollapsed, setIsCollapsed }: HeaderProp
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <button className="hidden md:flex p-2 hover:bg-light-dark/5 dark:hover:bg-dark-light/10 rounded-lg relative">
-                        <FaBell className="text-gray-600 dark:text-gray-400" />
-                        <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                    </button>
+
+                    <Notification />
 
                     <div className="relative" ref={menuRef}>
                         <button

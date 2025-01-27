@@ -10,17 +10,9 @@ import ProjectModal from '@/app/components/modals/ProjectModal'
 import DeleteConfirmModal from '@/app/components/modals/DeleteConfirmModal'
 import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { Project } from '@/app/types'
 
-interface Project {
-    id: string
-    title: string
-    description: string
-    image_url: string
-    project_url: string
-    sort_order: number
-    created_at: string
-    updated_at: string
-}
+
 
 interface ProjectFormData {
     title: string
@@ -187,7 +179,6 @@ export default function ProjectsPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsSubmitting(true)
-
         try {
             const projectData = {
                 ...formData,
@@ -282,6 +273,7 @@ export default function ProjectsPage() {
 
         setProjects(updatedProjects)
 
+
         try {
             const { error } = await supabase
                 .from('projects')
@@ -297,6 +289,7 @@ export default function ProjectsPage() {
                 )
 
             if (error) throw error
+            toast.success('Sıralama başarıyla güncellendi')
         } catch (error) {
             console.error('Error updating sort order:', error)
             toast.error('Sıralama güncellenirken bir hata oluştu')

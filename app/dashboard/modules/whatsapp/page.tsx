@@ -3,19 +3,9 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/app/utils/supabase/client';
 import { FaWhatsapp, FaChevronDown } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
+import type { WhatsAppSettings } from '@/app/types';
 
-interface WhatsAppSettings {
-    phone: string;
-    default_message: string;
-    is_active: boolean;
-    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
-    size: 'small' | 'medium' | 'large';
-    margin_x: number;
-    margin_y: number;
-    show_mobile: boolean;
-    bg_color: string;
-    text_color: string;
-}
+
 
 // Varsayılan WhatsApp renkleri
 const defaultWhatsAppColors = [

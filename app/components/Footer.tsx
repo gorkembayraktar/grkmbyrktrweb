@@ -2,8 +2,10 @@
 import { motion } from 'framer-motion'
 import { FaWhatsapp, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa'
 import type { FC } from 'react'
+import type { GeneralSettings } from '../types'
+import { formatPhoneNumber } from '@/app/utils/formatters'
 
-const Footer: FC = () => {
+const Footer: FC<{ settings: GeneralSettings }> = ({ settings }) => {
     return (
         <footer className="py-8 border-t border-dark mt-20">
             <div className="container">
@@ -17,20 +19,22 @@ const Footer: FC = () => {
                             className="hover:text-primary transition-colors flex items-center gap-2 group"
                         >
                             <FaEnvelope className="text-primary group-hover:text-primary" />
-                            bilgi@gorkembayraktar.com
+                            {settings.contact_email}
                         </motion.a>
+                        {settings.contact_phone && (
+                            <motion.a
+                                href={`tel:${settings.contact_phone}`}
+                                initial={{ opacity: 0 }}
+                                whileInView={{ opacity: 1 }}
+                                viewport={{ once: true }}
+                                className="hover:text-primary transition-colors flex items-center gap-2 group"
+                            >
+                                <FaPhone className="text-primary group-hover:text-primary" />
+                                {formatPhoneNumber(settings.contact_phone)}
+                            </motion.a>
+                        )}
                         <motion.a
-                            href="tel:+905340000000"
-                            initial={{ opacity: 0 }}
-                            whileInView={{ opacity: 1 }}
-                            viewport={{ once: true }}
-                            className="hover:text-primary transition-colors flex items-center gap-2 group"
-                        >
-                            <FaPhone className="text-primary group-hover:text-primary" />
-                            +90 534 000 00 00
-                        </motion.a>
-                        <motion.a
-                            href="https://maps.google.com/?q=Bursa,Türkiye"
+                            href={`https://maps.google.com/?q=${encodeURIComponent(settings.contact_address)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             initial={{ opacity: 0 }}
@@ -39,7 +43,7 @@ const Footer: FC = () => {
                             className="hover:text-primary transition-colors flex items-center gap-2 group"
                         >
                             <FaMapMarkerAlt className="text-primary group-hover:text-primary" />
-                            Bursa, Türkiye
+                            {settings.contact_address}
                         </motion.a>
                     </div>
                     <motion.p
@@ -47,7 +51,7 @@ const Footer: FC = () => {
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}
                     >
-                        © {new Date().getFullYear()} Tüm hakları saklıdır.
+                        {settings.footer_copyright}
                     </motion.p>
                 </div>
             </div>

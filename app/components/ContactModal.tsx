@@ -40,7 +40,6 @@ const ContactModal: FC<ContactModalProps> = ({ isOpen, onClose, title }) => {
         message: ''
     });
 
-    console.log('Form errors:', errors);
 
     const onSubmit = async (data: FormInputs) => {
         console.log('Form data:', data);

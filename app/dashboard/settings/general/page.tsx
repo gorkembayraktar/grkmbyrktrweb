@@ -4,16 +4,9 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/app/utils/supabase/client'
 import { toast } from 'react-hot-toast'
 import { FaHeading, FaAlignLeft, FaTags, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGlobe, FaSave } from 'react-icons/fa'
+import { GeneralSettings } from '@/app/types'
 
-interface GeneralSettings {
-    title: string
-    description: string
-    keywords: string
-    contact_email: string
-    contact_phone: string
-    contact_address: string
-    footer_copyright: string
-}
+
 
 export default function GeneralSettingsPage() {
     const [isLoading, setIsLoading] = useState(false)

@@ -1,6 +1,7 @@
 'use client'
 import { motion } from 'framer-motion'
 import type { FC } from 'react'
+import { Project } from '../types'
 
 const projects = [
     {
@@ -57,7 +58,7 @@ const ProjectSkeleton = () => (
     </div>
 )
 
-const Projects: FC = () => {
+const Projects: FC<{ projects: Project[] }> = ({ projects }) => {
     return (
         <section id="projects" className="py-20">
             <div className="container">
@@ -95,7 +96,7 @@ const Projects: FC = () => {
                         {projects.map((project, index) => (
                             <motion.a
                                 key={project.title}
-                                href={project.link}
+                                href={project.project_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 initial={{ opacity: 0, y: 20 }}
@@ -106,7 +107,7 @@ const Projects: FC = () => {
                             >
                                 <div className="aspect-video relative">
                                     <img
-                                        src={project.image}
+                                        src={project.image_url}
                                         alt={project.title}
                                         className="object-cover w-full h-full rounded-t-2xl"
                                     />
@@ -119,7 +120,7 @@ const Projects: FC = () => {
                         ))}
 
                         {/* Project Skeletons with Overlay */}
-                        {[1, 2].map((i) => (
+                        {projects.length < 4 && Array.from({ length: 4 - projects.length }, (e, i) => i).map((i) => (
                             <motion.div
                                 key={i}
                                 initial={{ opacity: 0, y: 20 }}

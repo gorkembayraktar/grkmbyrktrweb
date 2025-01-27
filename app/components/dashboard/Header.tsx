@@ -5,6 +5,7 @@ import { FaBell, FaUser, FaSignOutAlt, FaCog, FaBars, FaTimes, FaMoon, FaSun } f
 import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/app/utils/supabase/client'
 import Notification from './Notification'
+import { useRouter, usePathname } from 'next/navigation'
 
 interface HeaderProps {
     user: User | null
@@ -17,6 +18,8 @@ export default function Header({ user, isCollapsed, setIsCollapsed }: HeaderProp
     const [isDarkTheme, setIsDarkTheme] = useState(true)
     const menuRef = useRef<HTMLDivElement>(null)
     const supabase = createClient()
+    const router = useRouter()
+    const pathname = usePathname()
     // Theme durumunu kontrol et ve uygula
     useEffect(() => {
         // localStorage'dan theme durumunu al, yoksa dark theme kullan
@@ -147,9 +150,11 @@ export default function Header({ user, isCollapsed, setIsCollapsed }: HeaderProp
 
                                 {/* Menü Öğeleri */}
                                 <div className="py-1">
-                                    <button className="w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-light-dark/5 dark:hover:bg-dark-light/5 transition-colors">
+                                    <button
+                                        onClick={() => { router.push('/dashboard/profile'); setShowUserMenu(false) }}
+                                        className={`${pathname === '/dashboard/profile' ? 'bg-gray-100 dark:bg-gray-800' : ''} w-full px-4 py-2.5 text-left flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors`}>
                                         <FaCog className="text-gray-500 dark:text-gray-400" />
-                                        <span className="text-sm text-gray-700 dark:text-gray-200">Ayarlar</span>
+                                        <span className="text-sm text-gray-700 dark:text-gray-200">Profil Ayarları</span>
                                     </button>
                                     <button
                                         onClick={handleSignOut}

@@ -7,6 +7,7 @@ import Header from './Header'
 
 interface DashboardLayoutProps {
     user: User | null
+    setUserMetadataFullname?: (fullname: string) => Promise<boolean>
     children: React.ReactNode
 }
 

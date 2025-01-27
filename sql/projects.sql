@@ -5,9 +5,13 @@ create table if not exists public.projects (
     description text,
     image_url text,
     project_url text,
+    sort_order integer default 0 not null,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- Create index for sort_order
+create index if not exists projects_sort_order_idx on public.projects (sort_order);
 
 -- Updated_at trigger
 create or replace function public.handle_updated_at()

@@ -223,13 +223,13 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
                             const size = prompt('Font boyutu girin (örn: 22):');
                             if (size) {
                                 if (/^\d+$/.test(size)) {
-                                    editor.chain().focus().setFontSize(`${size}px`).run();
+                                    // editor.chain().focus().setFontSize(`${size}px`).run();
                                 } else {
                                     toast.error('Geçerli bir piksel değeri girin (örn: 22)');
                                 }
                             }
                         } else {
-                            editor.chain().focus().setFontSize(value).run();
+                            // editor.chain().focus().setFontSize(value).run();
                         }
                     }}
                     value={editor.getAttributes('textStyle').fontSize || ''}

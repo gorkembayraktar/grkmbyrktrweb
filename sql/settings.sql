@@ -46,4 +46,11 @@ insert into public.settings (key, value)
 values (
     'module_whatsapp',
     '{"phone":"","default_message":"","is_active":false,"position":"bottom-right","size":"medium","margin_x":18,"margin_y":86,"show_mobile":true}'
+) on conflict (key) do nothing;
+
+-- ScrollToTop modülü için varsayılan ayarlar
+insert into public.settings (key, value) 
+values (
+    'module_scroll_to_top',
+    '{"is_active":true,"position":"bottom-right","size":"medium","margin_x":18,"margin_y":18,"show_mobile":true,"bg_color":"#007AFF","text_color":"#FFFFFF","show_after_scroll":300,"scroll_behavior":"auto"}'
 ) on conflict (key) do nothing; 

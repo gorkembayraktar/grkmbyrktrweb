@@ -10,9 +10,12 @@ import Blog from './components/Blog'
 import type { FC } from 'react'
 import Whatsapp from './modules/Whatsapp'
 import { adminClient } from './utils/supabase/server'
-import { GeneralSettings, Project, Settings, WhatsAppSettings } from './types'
+import { GeneralSettings, Project, ScrollToTopSettings, Settings, WhatsAppSettings } from './types'
 import type { Metadata } from 'next'
 import { getSettings } from './utils/settings'
+import ScrollToTop from './modules/ScrollToTop'
+
+
 
 const Home: FC = async () => {
     const supabase = await adminClient();
@@ -39,6 +42,14 @@ const Home: FC = async () => {
         }
     }
 
+    let scrollSettings = settings?.module_scroll_to_top;
+    if (scrollSettings) {
+        try {
+            scrollSettings = JSON.parse(scrollSettings) as ScrollToTopSettings;
+        } catch (error) {
+            console.error('Error parsing ScrollToTop settings:', error);
+        }
+    }
     return (
         <main>
             <Navbar settings={settings} />
@@ -51,6 +62,7 @@ const Home: FC = async () => {
             <Contact />
             <Footer settings={settings} />
             <Whatsapp settings={whatsapp} />
+            <ScrollToTop settings={scrollSettings} />
         </main>
     );
 };

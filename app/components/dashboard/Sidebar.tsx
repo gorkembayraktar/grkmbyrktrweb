@@ -2,7 +2,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FaHome, FaNewspaper, FaProjectDiagram, FaUsers, FaCog, FaChartBar, FaList, FaPlus, FaTags, FaWrench, FaEnvelope, FaSlidersH, FaWhatsapp } from 'react-icons/fa'
+import { FaHome, FaNewspaper, FaProjectDiagram, FaUsers, FaCog, FaChartBar, FaList, FaPlus, FaTags, FaWrench, FaEnvelope, FaSlidersH, FaWhatsapp, FaArrowUp } from 'react-icons/fa'
 import { useEffect, useState } from 'react'
 
 interface SidebarProps {
@@ -53,6 +53,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
             path: '/dashboard/modules',
             subItems: [
                 { icon: FaWhatsapp, label: 'Whatsapp', path: '/dashboard/modules/whatsapp' },
+                { icon: FaArrowUp, label: 'Yukarı Çık', path: '/dashboard/modules/scroll-to-top' },
             ]
         },
         {

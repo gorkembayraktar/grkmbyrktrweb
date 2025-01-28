@@ -49,3 +49,17 @@ export interface Project {
     created_at: string
     updated_at: string
 }
+
+
+export interface ScrollToTopSettings {
+    is_active: boolean;
+    position: 'bottom-left' | 'bottom-right';
+    size: 'small' | 'medium' | 'large';
+    margin_x: number;
+    margin_y: number;
+    show_mobile: boolean;
+    bg_color: string;
+    text_color: string;
+    show_after_scroll: number;
+    scroll_behavior: 'auto' | 'manual'; // Yeni özellik
+} 

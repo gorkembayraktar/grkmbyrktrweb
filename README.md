@@ -2,6 +2,10 @@
 
 A modern and responsive portfolio website built with Next.js 15, TypeScript, and Tailwind CSS.
 
+## Live Site
+
+[https://gorkembayraktar.com/](https://gorkembayraktar.com/)
+
 ## Features
 
 - 🚀 Built with Next.js 15 App Router
@@ -84,7 +88,7 @@ For any inquiries, please reach out through the contact form on the website.
 
 # Admin Panel
 
-Next.js 13 App Router ve Supabase ile geliştirilmiş modern admin panel.
+Next.js 15 App Router ve Supabase ile geliştirilmiş modern admin panel.
 
 ## Özellikler
 
@@ -110,56 +114,24 @@ npm install
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+AUTHORIZED_EMAIL=your_email@example.com
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ```
 
-4. Supabase veritabanı kurulumu
-- Supabase projenizi oluşturun
-- SQL Editor'de aşağıdaki SQL kodunu çalıştırın:
+4. Veritabanı şemasını oluşturun:
+   - `sql/` klasörü altındaki SQL dosyalarını sırasıyla çalıştırın:
+     1. `profiles.sql` - Temel tabloları oluşturur
+     2. `settings.sql` - Ayarlar tablosunu ve varsayılan değerleri ekler
+     3. `posts.sql` -
+     4. `categories.sql` -
+     5. `projects.sql` -
+     6. `views.sql` -
+     7. `contacts.sql` -
+   SQL dosyalarını çalıştırmak için:
+   - Supabase Dashboard > SQL Editor bölümüne gidin
+   - Her bir SQL dosyasının içeriğini kopyalayıp yapıştırın ve çalıştırın
+   - Dosyaları sırasıyla çalıştırmaya dikkat edin
 
-```sql
--- Settings tablosu ve ilgili yapılandırmalar
-create table if not exists public.settings (
-    id uuid default gen_random_uuid() primary key,
-    key text not null unique,
-    value text,
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- RLS aktifleştirme
-alter table public.settings enable row level security;
-
--- Politikalar
-create policy "Enable read access for authenticated users" on public.settings
-    for select
-    to authenticated
-    using (true);
-
-create policy "Enable write access for authenticated users" on public.settings
-    for insert
-    to authenticated
-    with check (true);
-
-create policy "Enable update access for authenticated users" on public.settings
-    for update
-    to authenticated
-    using (true);
-
--- Updated_at için otomatik güncelleme fonksiyonu
-create or replace function public.handle_updated_at()
-returns trigger as $$
-begin
-    new.updated_at = timezone('utc'::text, now());
-    return new;
-end;
-$$ language plpgsql;
-
--- Updated_at trigger'ı
-create trigger handle_updated_at
-    before update on public.settings
-    for each row
-    execute function public.handle_updated_at();
-```
 
 5. Geliştirme sunucusunu başlatın
 ```bash

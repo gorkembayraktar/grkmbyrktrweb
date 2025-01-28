@@ -1,5 +1,6 @@
 import { FaImage, FaTimes } from 'react-icons/fa'
 import { AccordionItem } from '../Accordion'
+import { useState } from 'react';
 
 interface FeaturedImageSettingsProps {
     imageUrl: string;
@@ -7,8 +8,11 @@ interface FeaturedImageSettingsProps {
 }
 
 export function FeaturedImageSettings({ imageUrl, onChange }: FeaturedImageSettingsProps) {
+    const [isOpen, setIsOpen] = useState(false);
     return (
-        <AccordionItem id="featured" icon={<FaImage />} title="Öne Çıkan Görsel">
+        <AccordionItem id="featured" icon={<FaImage />} title="Öne Çıkan Görsel" isOpen={isOpen} onToggle={() => {
+            setIsOpen(!isOpen)
+        }}>
             <div className="space-y-4">
                 <div className="flex gap-2">
                     <input

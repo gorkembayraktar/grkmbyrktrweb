@@ -1,5 +1,6 @@
 import { FaLink } from 'react-icons/fa'
 import { AccordionItem } from '../Accordion'
+import { useState } from 'react';
 
 interface URLSettingsProps {
     slug: string;
@@ -8,8 +9,11 @@ interface URLSettingsProps {
 }
 
 export function URLSettings({ slug, title, onChange }: URLSettingsProps) {
+    const [isOpen, setIsOpen] = useState(true);
     return (
-        <AccordionItem id="url" icon={<FaLink />} title="URL Ayarları">
+        <AccordionItem id="url" icon={<FaLink />} title="URL Ayarları" isOpen={isOpen} onToggle={() => {
+            setIsOpen(!isOpen)
+        }}   >
             <div className="space-y-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

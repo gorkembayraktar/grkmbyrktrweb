@@ -23,6 +23,7 @@ export function PostSettings({ formData, categories, onChange }: PostSettingsPro
                     title={formData.title}
                     onChange={(slug) => onChange('slug', slug)}
                 />
+
                 <CategorySettings
                     categories={categories}
                     selectedCategories={formData.categories}

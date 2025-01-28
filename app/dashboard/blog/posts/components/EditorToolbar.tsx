@@ -202,8 +202,10 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
             <div className="flex gap-1 border-r border-gray-200 dark:border-gray-700 pr-2">
                 {/* Font Ailesi */}
                 <select
-                    onChange={(e) => editor.chain().setFontFamily(e.target.value).run()}
-                    value={editor.getAttributes('textStyle').fontFamily || 'Inter'}
+                    onChange={(e) => {
+                        editor.chain().focus().setFontFamily(e.target.value).run()
+                    }}
+                    value={editor.getAttributes('textStyle').fontFamily || ''}
                     className="h-8 px-2 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
                 >
                     {FONT_FAMILIES.map(font => (
@@ -220,14 +222,14 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
                         if (value === 'custom') {
                             const size = prompt('Font boyutu girin (örn: 22):');
                             if (size) {
-                                if (/^\d$/.test(size)) {
-                                    editor.chain().setFontSize(size + 'px').run();
+                                if (/^\d+$/.test(size)) {
+                                    editor.chain().focus().setFontSize(`${size}px`).run();
                                 } else {
-                                    toast.error('Geçerli bir piksel değeri girin (örn: 22px)');
+                                    toast.error('Geçerli bir piksel değeri girin (örn: 22)');
                                 }
                             }
                         } else {
-                            editor.chain().setFontSize(value).run();
+                            editor.chain().focus().setFontSize(value).run();
                         }
                     }}
                     value={editor.getAttributes('textStyle').fontSize || ''}

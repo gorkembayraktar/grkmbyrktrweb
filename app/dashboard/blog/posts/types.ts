@@ -1,4 +1,5 @@
 export interface PostFormData {
+    id?: string;
     title: string;
     slug: string;
     content: string;
@@ -11,6 +12,8 @@ export interface PostFormData {
     meta_keywords: string;
     is_indexable: boolean;
     canonical_url: string;
+    categoriesWith?: Category[];
+    created_at?: string;
 }
 
 export interface Category {

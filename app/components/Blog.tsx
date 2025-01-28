@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion'
 import { FaClock, FaTag } from 'react-icons/fa'
 import type { FC } from 'react'
+import { Category, PostFormData } from '../dashboard/blog/posts/types'
 
 const blogPosts = [
     {
@@ -30,7 +31,7 @@ const blogPosts = [
     }
 ]
 
-const Blog: FC = () => {
+const Blog: FC<{ posts: PostFormData[] }> = ({ posts }) => {
     return (
         <section id="blog" className="py-20">
             <div className="container">
@@ -74,7 +75,7 @@ const Blog: FC = () => {
 
                     {/* Blog Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {blogPosts.map((post, index) => (
+                        {posts.map((post: PostFormData, index: number) => (
                             <motion.article
                                 key={post.title}
                                 initial={{ opacity: 0, y: 20 }}
@@ -106,29 +107,30 @@ const Blog: FC = () => {
                                 <div className="space-y-4">
                                     {/* Meta */}
                                     <div className="flex items-center gap-4 text-sm text-gray-400">
-                                        <div className="flex items-center gap-2">
-                                            <FaTag className="text-primary" />
-                                            <span>{post.category}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <FaClock className="text-primary" />
-                                            <span>{post.readTime}</span>
-                                        </div>
+                                        {
+                                            post.categoriesWith?.map((category: Category) => (
+                                                <div className="flex items-center gap-2" key={category.id}>
+                                                    <FaTag className="text-primary" />
+                                                    <span>{category.name}</span>
+                                                </div>
+                                            ))
+                                        }
                                     </div>
 
                                     {/* Title */}
                                     <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
-                                        {post.title}
+                                        {post.title.slice(0, 30) + (post.title.length > 30 ? '...' : '')}
                                     </h3>
 
                                     {/* Excerpt */}
                                     <p className="text-gray-400">
-                                        {post.excerpt}
+                                        {post.excerpt ? post.excerpt :
+                                            (post.content.replace(/<[^>]*>?/gm, '').split(' ').slice(0, 15).join(' ') + '...')}
                                     </p>
 
                                     {/* Date */}
                                     <p className="text-sm text-gray-500">
-                                        {post.date}
+                                        {post.created_at ? new Date(post.created_at).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' }) : ''}
                                     </p>
                                 </div>
                             </motion.article>

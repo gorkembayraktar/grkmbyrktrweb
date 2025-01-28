@@ -14,6 +14,7 @@ import { GeneralSettings, Project, ScrollToTopSettings, Settings, WhatsAppSettin
 import type { Metadata } from 'next'
 import { getSettings } from './utils/settings'
 import ScrollToTop from './modules/ScrollToTop'
+import { Category, PostFormData } from './dashboard/blog/posts/types'
 
 
 
@@ -50,6 +51,9 @@ const Home: FC = async () => {
             console.error('Error parsing ScrollToTop settings:', error);
         }
     }
+
+    const posts = await getPosts(3);
+
     return (
         <main>
             <Navbar settings={settings} />
@@ -58,7 +62,7 @@ const Home: FC = async () => {
             <Services />
             <About />
             <Projects projects={projects as Project[]} />
-            <Blog />
+            <Blog posts={posts as PostFormData[]} />
             <Contact />
             <Footer settings={settings} />
             <Whatsapp settings={whatsapp} />
@@ -68,7 +72,65 @@ const Home: FC = async () => {
 };
 
 
+async function getPosts(limit: number = 3) {
+    const supabase = await adminClient();
 
+    // Önce postları al
+    const { data: posts, error: postsError } = await supabase
+        .from('posts')
+        .select(`*`)
+        .eq('status', 'published')
+        .limit(limit)
+        .order('created_at', { ascending: false });
+
+    if (postsError) {
+        console.error('Error fetching posts:', postsError);
+        return [];
+    }
+
+    // Her post için kategorileri al
+    return await Promise.all(posts?.map(async (post: PostFormData) => {
+        const { data: postCategories, error: categoriesError } = await supabase
+            .from('post_categories')
+            .select(`
+                post_id,
+                categories!inner(
+                    id,
+                    name,
+                    slug,
+                    parent_id
+                ) 
+            `)
+            .eq('post_id', post.id);
+
+        if (categoriesError) {
+            console.error('Error fetching categories:', categoriesError);
+        }
+
+        if (postCategories) {
+            const list = postCategories as any;
+
+            post.categoriesWith = list.map((pc: PostCategoriesType) => ({
+                id: pc.categories.id,
+                name: pc.categories.name,
+                parent_id: pc.categories.parent_id
+            } as Category)) || [];
+        }
+
+        return post;
+    })) as PostFormData[] || [];
+}
+
+interface PostCategoriesType {
+    post_id: string;
+    categories: CategoriesType;
+}
+interface CategoriesType {
+    id: string;
+    name: string;
+    slug: string;
+    parent_id: string | null;
+}
 
 
 export async function generateMetadata(): Promise<Metadata> {

@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/app/utils/supabase/client'
 import { toast } from 'react-hot-toast'
-import { FaSave, FaImage, FaTimes, FaEye, FaCog, FaTags, FaChevronDown, FaChevronRight } from 'react-icons/fa'
+import { FaSave, FaImage, FaTimes, FaEye, FaCog, FaTags, FaChevronDown, FaChevronRight, FaArrowLeft, FaBold, FaItalic, FaUnderline, FaStrikethrough, FaListUl, FaListOl, FaQuoteRight, FaLink, FaUnlink, FaTable, FaAlignLeft, FaAlignCenter, FaAlignRight, FaAlignJustify, FaCode, FaRedo, FaUndo, FaPalette, FaHeading, FaCheckCircle, FaExclamationTriangle, FaChartBar } from 'react-icons/fa'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import React from 'react'
@@ -23,6 +23,8 @@ import TextAlign from '@tiptap/extension-text-align'
 import FontFamily from '@tiptap/extension-font-family'
 import Highlight from '@tiptap/extension-highlight'
 import Typography from '@tiptap/extension-typography'
+import FontSize from '@tiptap/extension-font-size'
+import { createPortal } from 'react-dom'
 
 interface Category {
     id: string
@@ -51,6 +53,171 @@ interface PageParams {
     id: string;
 }
 
+// Font seçenekleri
+const FONT_FAMILIES = [
+    { label: 'Varsayılan', value: 'Inter' },
+    { label: 'Arial', value: 'Arial' },
+    { label: 'Times New Roman', value: 'Times New Roman' },
+    { label: 'Georgia', value: 'Georgia' },
+    { label: 'Courier New', value: 'Courier New' },
+];
+
+// Yazı boyutları
+const FONT_SIZES = [
+    { label: 'Varsayılan', value: '' },
+    { label: '12px', value: '12px' },
+    { label: '14px', value: '14px' },
+    { label: '16px', value: '16px' },
+    { label: '18px', value: '18px' },
+    { label: '20px', value: '20px' },
+    { label: '24px', value: '24px' },
+    { label: '28px', value: '28px' },
+    { label: '32px', value: '32px' },
+    { label: '36px', value: '36px' },
+    { label: '48px', value: '48px' },
+    { label: 'Özel', value: 'custom' }
+];
+
+// Renk grupları
+const TEXT_COLORS = {
+    Temel: [
+        { label: 'Siyah', value: '#000000' },
+        { label: 'Beyaz', value: '#FFFFFF' },
+        { label: 'Gri', value: '#718096' },
+    ],
+    Birincil: [
+        { label: 'Kırmızı', value: '#E53E3E' },
+        { label: 'Turuncu', value: '#ED8936' },
+        { label: 'Sarı', value: '#ECC94B' },
+        { label: 'Yeşil', value: '#48BB78' },
+        { label: 'Mavi', value: '#4299E1' },
+        { label: 'Mor', value: '#9F7AEA' },
+        { label: 'Pembe', value: '#ED64A6' },
+    ],
+    Tonlar: [
+        { label: 'Açık Kırmızı', value: '#FEB2B2' },
+        { label: 'Açık Turuncu', value: '#FBD38D' },
+        { label: 'Açık Sarı', value: '#FAF089' },
+        { label: 'Açık Yeşil', value: '#9AE6B4' },
+        { label: 'Açık Mavi', value: '#90CDF4' },
+        { label: 'Açık Mor', value: '#D6BCFA' },
+        { label: 'Açık Pembe', value: '#FBB6CE' },
+    ],
+};
+
+// ColorPicker komponentini en üste taşıyalım (diğer komponentlerden önce)
+function ColorPicker({
+    isOpen,
+    onClose,
+    position,
+    editor,
+    onColorSelect
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    position: { top: number; left: number; buttonWidth: number; buttonHeight: number };
+    editor: any;
+    onColorSelect: (color: string) => void;
+}) {
+    if (!isOpen || typeof window === 'undefined') return null;
+
+    const PICKER_WIDTH = 256; // w-64 = 256px
+    const PICKER_HEIGHT = 400; // tahmini yükseklik
+    const MARGIN = 8;
+
+    // Ekran sınırlarını kontrol et
+    const adjustedPosition = {
+        top: position.top,
+        left: position.left
+    };
+
+    // Sağa taşma kontrolü
+    if (position.left + PICKER_WIDTH > window.innerWidth) {
+        adjustedPosition.left = position.left - PICKER_WIDTH + position.buttonWidth;
+    }
+
+    // Alta taşma kontrolü
+    if (position.top + PICKER_HEIGHT > window.innerHeight) {
+        adjustedPosition.top = position.top - PICKER_HEIGHT - MARGIN;
+    }
+
+    // Sola taşma kontrolü
+    if (adjustedPosition.left < MARGIN) {
+        adjustedPosition.left = MARGIN;
+    }
+
+    // Üste taşma kontrolü
+    if (adjustedPosition.top < MARGIN) {
+        adjustedPosition.top = position.top + position.buttonHeight + MARGIN;
+    }
+
+    return createPortal(
+        <div className="fixed inset-0 z-50" onClick={onClose}>
+            <div
+                className="absolute p-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 w-64"
+                style={{
+                    top: adjustedPosition.top,
+                    left: adjustedPosition.left,
+                    maxHeight: 'calc(100vh - 100px)',
+                    overflowY: 'auto'
+                }}
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Hazır Renkler */}
+                <div className="space-y-3">
+                    {Object.entries(TEXT_COLORS).map(([group, colors]) => (
+                        <div key={group}>
+                            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
+                                {group}
+                            </div>
+                            <div className="grid grid-cols-7 gap-1">
+                                {colors.map(color => (
+                                    <button
+                                        key={color.value}
+                                        onClick={() => onColorSelect(color.value)}
+                                        className={`
+                                            w-7 h-7 rounded-lg border hover:scale-110 transition-transform
+                                            ${color.value === '#FFFFFF' ? 'border-gray-300' : 'border-transparent'}
+                                            ${editor.getAttributes('textStyle').color === color.value ? 'ring-2 ring-primary ring-offset-2' : ''}
+                                        `}
+                                        style={{ backgroundColor: color.value }}
+                                        title={color.label}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Özel Renk Seçici */}
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                        Özel Renk
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <input
+                            type="color"
+                            onChange={(e) => onColorSelect(e.target.value)}
+                            value={editor.getAttributes('textStyle').color || '#000000'}
+                            className="w-8 h-8 p-0 border-0 rounded cursor-pointer"
+                        />
+                        <button
+                            onClick={() => {
+                                editor.chain().focus().unsetColor().run();
+                                onClose();
+                            }}
+                            className="flex-1 px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        >
+                            Rengi Temizle
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+}
+
 export default function EditPostPage({ params }: { params: Promise<PageParams> }) {
     const router = useRouter()
     const [categories, setCategories] = useState<Category[]>([])
@@ -75,7 +242,7 @@ export default function EditPostPage({ params }: { params: Promise<PageParams> }
 
     const supabase = createClient()
 
-    // Yazıyı yükle
+    // Önce post verisini yükle
     useEffect(() => {
         const loadPost = async () => {
             try {
@@ -117,6 +284,7 @@ export default function EditPostPage({ params }: { params: Promise<PageParams> }
         loadPost()
     }, [postId])
 
+    // Editor ayarlarını güncelle
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -141,22 +309,51 @@ export default function EditPostPage({ params }: { params: Promise<PageParams> }
             TableRow,
             TableHeader,
             TableCell,
-            TextStyle,
-            Color,
+            TextStyle.configure({
+                types: ['textStyle']
+            }),
+            Color.configure({
+                types: ['textStyle']
+            }),
+            FontFamily.configure({
+                types: ['textStyle']
+            }),
+            FontSize.configure({
+                types: ['textStyle']
+            }),
             TextAlign.configure({
                 types: ['heading', 'paragraph']
             }),
-            FontFamily,
             Highlight.configure({
                 multicolor: true
             }),
             Typography
         ],
+        editorProps: {
+            attributes: {
+                class: 'prose prose-lg max-w-none dark:prose-invert focus:outline-none min-h-[500px]'
+            }
+        },
+        autofocus: false,
         content: formData.content,
         onUpdate: ({ editor }) => {
-            setFormData(prev => ({ ...prev, content: editor.getHTML() }))
+            // Debounce ekleyelim
+            const content = editor.getHTML();
+            const timeoutId = setTimeout(() => {
+                setFormData(prev => ({ ...prev, content }));
+            }, 300); // 300ms bekle
+
+            return () => clearTimeout(timeoutId);
         }
     })
+    const debounceRef = useRef(false);
+    useEffect(() => {
+        if (debounceRef.current) return;
+        if (editor && formData.content) {
+            editor.commands.setContent(formData.content)
+            debounceRef.current = true;
+        }
+    }, [editor, formData.content])
 
     // Kategorileri yükle
     useEffect(() => {
@@ -241,7 +438,7 @@ export default function EditPostPage({ params }: { params: Promise<PageParams> }
                                 }
                             }
                         }}
-                        className="rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
+                        className="rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600"
                     />
                     <div className="ml-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
                         {category.children && category.children.length > 0 && (
@@ -283,6 +480,7 @@ export default function EditPostPage({ params }: { params: Promise<PageParams> }
         setIsLoading(true)
 
         try {
+
             // Yazıyı güncelle
             const { error: postError } = await supabase
                 .from('posts')
@@ -328,7 +526,7 @@ export default function EditPostPage({ params }: { params: Promise<PageParams> }
             }
 
             toast.success('Yazı başarıyla güncellendi')
-            router.push('/dashboard/blog/posts')
+            //router.push('/dashboard/blog/posts')
         } catch (error: any) {
             console.error('Error updating post:', error)
             toast.error(error?.message || 'Yazı güncellenirken bir hata oluştu')
@@ -341,597 +539,799 @@ export default function EditPostPage({ params }: { params: Promise<PageParams> }
     const handleHeadingChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const level = parseInt(e.target.value)
         if (level === 0) {
-            editor?.chain().focus().setParagraph().run()
+            editor?.chain().setParagraph().run()
         } else if (level >= 1 && level <= 6) {
-            editor?.chain().focus().toggleHeading({ level: level as 1 | 2 | 3 | 4 | 5 | 6 }).run()
+            editor?.chain().toggleHeading({ level: level as 1 | 2 | 3 | 4 | 5 | 6 }).run()
         }
     }
 
-    return (
-        <div className="py-6">
-            <div className="px-4 sm:px-6 md:px-8">
-                <form onSubmit={handleSubmit}>
-                    {/* Üst Bar */}
-                    <div className="mb-6 flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-                        <div className="flex items-center gap-4">
-                            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                                Yazıyı Düzenle
-                            </h1>
-                            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                                <span className={`px-2 py-1 rounded-full ${formData.status === 'published' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}`}>
-                                    {formData.status === 'published' ? 'Yayında' : 'Taslak'}
+    // SEO Analiz fonksiyonları
+    const analyzeSEO = (content: string, formData: PostFormData) => {
+        const results = {
+            title: analyzeTitle(formData.meta_title || formData.title),
+            description: analyzeDescription(formData.meta_description),
+            content: analyzeContent(content),
+            keywords: analyzeKeywords(content, formData.meta_keywords),
+            headings: analyzeHeadings(content),
+            score: 0
+        };
+
+        // Toplam skor hesapla (100 üzerinden)
+        results.score = calculateScore(results);
+
+        return results;
+    };
+
+    const analyzeTitle = (title: string) => ({
+        length: title.length,
+        isOptimal: title.length >= 30 && title.length <= 60,
+        message: title.length < 30 ? 'Title çok kısa' :
+            title.length > 60 ? 'Title çok uzun' :
+                'Title uzunluğu ideal'
+    });
+
+    const analyzeDescription = (description: string) => ({
+        length: description.length,
+        isOptimal: description.length >= 120 && description.length <= 160,
+        message: description.length < 120 ? 'Description çok kısa' :
+            description.length > 160 ? 'Description çok uzun' :
+                'Description uzunluğu ideal'
+    });
+
+    const analyzeContent = (content: string) => {
+        const wordCount = content.split(/\s+/).length;
+        return {
+            wordCount,
+            isOptimal: wordCount >= 300,
+            message: wordCount < 300 ? 'İçerik çok kısa (min. 300 kelime önerilir)' :
+                'İçerik uzunluğu yeterli'
+        };
+    };
+
+    const analyzeKeywords = (content: string, keywords: string) => {
+        if (!keywords) return {
+            message: 'Anahtar kelimeler belirlenmemiş',
+            isOptimal: false,
+            density: []
+        };
+
+        const keywordList = keywords.split(',').map(k => k.trim().toLowerCase());
+        const contentLower = content.toLowerCase();
+        const wordCount = content.split(/\s+/).length;
+
+        const density = keywordList.map(keyword => {
+            const count = (contentLower.match(new RegExp(keyword, 'g')) || []).length;
+            const percentage = (count / wordCount) * 100;
+            return {
+                keyword,
+                count,
+                percentage: percentage.toFixed(1),
+                isOptimal: percentage >= 0.5 && percentage <= 2.5
+            };
+        });
+
+        const isOptimal = density.some(d => d.isOptimal);
+
+        return {
+            density,
+            isOptimal,
+            message: isOptimal ? 'Anahtar kelime yoğunluğu uygun' : 'Anahtar kelime kullanımı yetersiz'
+        };
+    };
+
+    const analyzeHeadings = (content: string) => {
+        const h1Count = (content.match(/<h1/g) || []).length;
+        const h2Count = (content.match(/<h2/g) || []).length;
+        const h3Count = (content.match(/<h3/g) || []).length;
+
+        return {
+            h1: h1Count,
+            h2: h2Count,
+            h3: h3Count,
+            isOptimal: h1Count === 1 && h2Count >= 2 && h3Count >= 1,
+            message: h1Count !== 1 ? 'Sayfada bir adet H1 etiketi olmalı' :
+                h2Count < 2 ? 'En az 2 adet H2 etiketi önerilir' :
+                    h3Count < 1 ? 'En az 1 adet H3 etiketi önerilir' :
+                        'Başlık hiyerarşisi uygun'
+        };
+    };
+
+    const calculateScore = (results: any) => {
+        let score = 0;
+
+        // Title (20 puan)
+        if (results.title.isOptimal) score += 20;
+
+        // Description (20 puan)
+        if (results.description.isOptimal) score += 20;
+
+        // Content length (20 puan)
+        if (results.content.isOptimal) score += 20;
+
+        // Keywords (20 puan)
+        if (results.keywords.isOptimal) score += 20;
+
+        // Headings (20 puan)
+        if (results.headings.isOptimal) score += 20;
+
+        return score;
+    };
+
+    // SEO Analiz Komponenti
+    function SEOAnalysis({ content, formData }: { content: string, formData: PostFormData }) {
+        const analysis = analyzeSEO(content, formData);
+
+        return (
+            <div className="space-y-4">
+                {/* SEO Skoru */}
+                <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                    <span className="font-medium">SEO Skoru</span>
+                    <div className={`px-3 py-1 rounded-full text-sm font-medium
+                        ${analysis.score >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                            analysis.score >= 50 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                                'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}>
+                        {analysis.score}/100
+                    </div>
+                </div>
+
+                {/* Detaylı Analiz */}
+                <div className="space-y-3">
+                    <AnalysisItem
+                        title="Başlık"
+                        message={`${analysis.title.length} karakter - ${analysis.title.message}`}
+                        isOptimal={analysis.title.isOptimal}
+                    />
+                    <AnalysisItem
+                        title="Açıklama"
+                        message={`${analysis.description.length} karakter - ${analysis.description.message}`}
+                        isOptimal={analysis.description.isOptimal}
+                    />
+                    <AnalysisItem
+                        title="İçerik"
+                        message={`${analysis.content.wordCount} kelime - ${analysis.content.message}`}
+                        isOptimal={analysis.content.isOptimal}
+                    />
+                    <AnalysisItem
+                        title="Başlık Etiketleri"
+                        message={`H1: ${analysis.headings.h1}, H2: ${analysis.headings.h2}, H3: ${analysis.headings.h3} - ${analysis.headings.message}`}
+                        isOptimal={analysis.headings.isOptimal}
+                    />
+
+                    {/* Anahtar Kelime Analizi */}
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                            <span className="font-medium">Anahtar Kelimeler</span>
+                            {analysis.keywords.isOptimal ? (
+                                <FaCheckCircle className="text-green-500" size={14} />
+                            ) : (
+                                <FaExclamationTriangle className="text-yellow-500" size={14} />
+                            )}
+                        </div>
+                        {analysis.keywords.density.map((kw: any) => (
+                            <div key={kw.keyword} className="flex items-center justify-between text-sm">
+                                <span>{kw.keyword}</span>
+                                <span className={kw.isOptimal ? 'text-green-500' : 'text-yellow-500'}>
+                                    {kw.count} kez (%{kw.percentage})
                                 </span>
                             </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Analiz Öğesi Komponenti
+    function AnalysisItem({ title, message, isOptimal }: { title: string, message: string, isOptimal: boolean }) {
+        return (
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <span className="font-medium">{title}</span>
+                    {isOptimal ? (
+                        <FaCheckCircle className="text-green-500" size={14} />
+                    ) : (
+                        <FaExclamationTriangle className="text-yellow-500" size={14} />
+                    )}
+                </div>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{message}</span>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            {/* Üst Bar */}
+            <div className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <div className="px-6 py-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => router.push('/dashboard/blog/posts')}
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                            >
+                                <FaArrowLeft size={20} />
+                            </button>
+                            <input
+                                type="text"
+                                value={formData.title}
+                                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                                placeholder="Yazı başlığı..."
+                                className="text-xl font-medium bg-transparent border-0 outline-none focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
+                            />
                         </div>
                         <div className="flex items-center gap-3">
-                            <button
-                                type="button"
-                                onClick={() => router.back()}
-                                className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                            <select
+                                value={formData.status}
+                                onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as 'draft' | 'published' }))}
+                                className="rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm"
                             >
-                                İptal
+                                <option value="draft">Taslak</option>
+                                <option value="published">Yayınla</option>
+                            </select>
+                            <button
+                                onClick={handleSubmit}
+                                disabled={isLoading}
+                                className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed gap-2"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        <span>Kaydediliyor</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <FaSave size={16} />
+                                        <span>Kaydet</span>
+                                    </>
+                                )}
                             </button>
-                            <div className="relative">
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            Kaydediliyor...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <FaSave className="-ml-1 mr-2 h-4 w-4" />
-                                            Kaydet
-                                        </>
-                                    )}
-                                </button>
-                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    {/* Ana İçerik */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Sol Kolon - Ana Form */}
-                        <div className="lg:col-span-2 space-y-6">
-                            {/* Başlık */}
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                                <input
-                                    type="text"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                                    placeholder="Başlık yazın..."
-                                    className="w-full text-3xl font-medium bg-transparent p-0 
-                                             border-0 border-b-2 border-transparent 
-                                             focus:border-0 focus:ring-0 
-                                             transition-colors duration-200 ease-in-out
-                                             dark:text-white placeholder-gray-400/60 dark:placeholder-gray-500/60
-                                             hover:border-b-2 hover:border-gray-200 dark:hover:border-gray-700"
-                                    required
+            {/* Ana İçerik */}
+            <div className="container mx-auto px-4 py-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Sol Panel - Editor */}
+                    <div className="lg:col-span-2 space-y-6">
+                        {/* Editor Card */}
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                            <div className="sticky top-[71px] z-50 bg-white dark:bg-gray-800  border-b border-gray-200 dark:border-gray-700">
+                                {/* Editor Toolbar */}
+                                {editor && (
+                                    <div className="border-b border-gray-200 dark:border-gray-700 shadow-sm">
+                                        <div className="overflow-x-auto">
+                                            <EditorToolbar editor={editor} />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="p-6">
+                                <EditorContent
+                                    editor={editor}
+                                    className="prose prose-lg max-w-none dark:prose-invert focus:outline-none min-h-[500px]"
+                                    autoFocus={false}
                                 />
                             </div>
-
-                            {/* İçerik */}
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-                                <div className="border-b border-gray-200 dark:border-gray-700 p-2">
-                                    <div className="flex flex-wrap gap-2 mb-2 pb-2 border-b border-gray-200 dark:border-gray-700">
-                                        <select
-                                            onChange={handleHeadingChange}
-                                            value={
-                                                editor?.isActive('heading', { level: 1 }) ? '1' :
-                                                    editor?.isActive('heading', { level: 2 }) ? '2' :
-                                                        editor?.isActive('heading', { level: 3 }) ? '3' :
-                                                            editor?.isActive('heading', { level: 4 }) ? '4' :
-                                                                editor?.isActive('heading', { level: 5 }) ? '5' :
-                                                                    editor?.isActive('heading', { level: 6 }) ? '6' : '0'
-                                            }
-                                            className="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm"
-                                        >
-                                            <option value="0">Normal</option>
-                                            <option value="1">Başlık 1</option>
-                                            <option value="2">Başlık 2</option>
-                                            <option value="3">Başlık 3</option>
-                                            <option value="4">Başlık 4</option>
-                                            <option value="5">Başlık 5</option>
-                                            <option value="6">Başlık 6</option>
-                                        </select>
-
-                                        <select
-                                            onChange={(e) => editor?.chain().focus().setFontFamily(e.target.value).run()}
-                                            value={editor?.getAttributes('textStyle').fontFamily}
-                                            className="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm"
-                                        >
-                                            <option value="system-ui">Sistem Fontu</option>
-                                            <option value="Arial">Arial</option>
-                                            <option value="Georgia">Georgia</option>
-                                            <option value="Times New Roman">Times New Roman</option>
-                                            <option value="Courier New">Courier New</option>
-                                        </select>
-
-                                        <div className="flex items-center gap-1 border-l border-gray-200 dark:border-gray-700 pl-2">
-                                            <input
-                                                type="color"
-                                                onChange={(e) => editor?.chain().focus().setColor(e.target.value).run()}
-                                                value={editor?.getAttributes('textStyle').color || '#000000'}
-                                                className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => editor?.chain().focus().unsetColor().run()}
-                                                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                                            >
-                                                <FaTimes className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => editor?.chain().focus().toggleBold().run()}
-                                            className={`p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${editor?.isActive('bold') ? 'bg-gray-100 dark:bg-gray-700' : ''
-                                                }`}
-                                        >
-                                            <strong>B</strong>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => editor?.chain().focus().toggleItalic().run()}
-                                            className={`p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${editor?.isActive('italic') ? 'bg-gray-100 dark:bg-gray-700' : ''
-                                                }`}
-                                        >
-                                            <em>I</em>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => editor?.chain().focus().toggleUnderline().run()}
-                                            className={`p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${editor?.isActive('underline') ? 'bg-gray-100 dark:bg-gray-700' : ''
-                                                }`}
-                                        >
-                                            <u>U</u>
-                                        </button>
-
-                                        <div className="border-l border-gray-200 dark:border-gray-700 pl-2 flex gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => editor?.chain().focus().setTextAlign('left').run()}
-                                                className={`p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${editor?.isActive({ textAlign: 'left' }) ? 'bg-gray-100 dark:bg-gray-700' : ''
-                                                    }`}
-                                            >
-                                                ←
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => editor?.chain().focus().setTextAlign('center').run()}
-                                                className={`p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${editor?.isActive({ textAlign: 'center' }) ? 'bg-gray-100 dark:bg-gray-700' : ''
-                                                    }`}
-                                            >
-                                                ↔
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => editor?.chain().focus().setTextAlign('right').run()}
-                                                className={`p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${editor?.isActive({ textAlign: 'right' }) ? 'bg-gray-100 dark:bg-gray-700' : ''
-                                                    }`}
-                                            >
-                                                →
-                                            </button>
-                                        </div>
-
-                                        <div className="border-l border-gray-200 dark:border-gray-700 pl-2 flex gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                                                className={`p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${editor?.isActive('bulletList') ? 'bg-gray-100 dark:bg-gray-700' : ''
-                                                    }`}
-                                            >
-                                                • Liste
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-                                                className={`p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${editor?.isActive('orderedList') ? 'bg-gray-100 dark:bg-gray-700' : ''
-                                                    }`}
-                                            >
-                                                1. Liste
-                                            </button>
-                                        </div>
-
-                                        <div className="border-l border-gray-200 dark:border-gray-700 pl-2 flex gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const url = window.prompt('URL giriniz:')
-                                                    if (url) {
-                                                        editor?.chain().focus().setLink({ href: url }).run()
-                                                    }
-                                                }}
-                                                className={`p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${editor?.isActive('link') ? 'bg-gray-100 dark:bg-gray-700' : ''
-                                                    }`}
-                                            >
-                                                Link
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const url = window.prompt('Görsel URL\'si giriniz:')
-                                                    if (url) {
-                                                        editor?.chain().focus().setImage({ src: url }).run()
-                                                    }
-                                                }}
-                                                className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                                            >
-                                                Görsel
-                                            </button>
-                                        </div>
-
-                                        <div className="border-l border-gray-200 dark:border-gray-700 pl-2 flex gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
-                                                className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                                            >
-                                                Tablo
-                                            </button>
-                                            {editor?.isActive('table') && (
-                                                <>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => editor?.chain().focus().addColumnBefore().run()}
-                                                        className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                    >
-                                                        +←
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => editor?.chain().focus().addColumnAfter().run()}
-                                                        className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                    >
-                                                        →+
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => editor?.chain().focus().addRowBefore().run()}
-                                                        className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                    >
-                                                        +↑
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => editor?.chain().focus().addRowAfter().run()}
-                                                        className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                    >
-                                                        ↓+
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => editor?.chain().focus().deleteColumn().run()}
-                                                        className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                    >
-                                                        -←
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => editor?.chain().focus().deleteRow().run()}
-                                                        className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                    >
-                                                        -↑
-                                                    </button>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                                <style jsx global>{`
-                                    .ProseMirror {
-                                        padding: 1rem;
-                                        min-height: 400px;
-                                        outline: none;
-                                    }
-                                    .ProseMirror table {
-                                        border-collapse: collapse;
-                                        margin: 0;
-                                        overflow: hidden;
-                                        table-layout: fixed;
-                                        width: 100%;
-                                    }
-                                    .ProseMirror table td,
-                                    .ProseMirror table th {
-                                        border: 2px solid #ced4da;
-                                        box-sizing: border-box;
-                                        min-width: 1em;
-                                        padding: 3px 5px;
-                                        position: relative;
-                                        vertical-align: top;
-                                    }
-                                    .ProseMirror table th {
-                                        background-color: #f8f9fa;
-                                        font-weight: bold;
-                                        text-align: left;
-                                    }
-                                    .ProseMirror table .selectedCell:after {
-                                        background: rgba(200, 200, 255, 0.4);
-                                        content: "";
-                                        left: 0;
-                                        right: 0;
-                                        top: 0;
-                                        bottom: 0;
-                                        pointer-events: none;
-                                        position: absolute;
-                                        z-index: 2;
-                                    }
-                                    .ProseMirror table .column-resize-handle {
-                                        background-color: #adf;
-                                        bottom: -2px;
-                                        position: absolute;
-                                        right: -2px;
-                                        pointer-events: none;
-                                        top: 0;
-                                        width: 4px;
-                                    }
-                                    .ProseMirror table p {
-                                        margin: 0;
-                                    }
-                                `}</style>
-                                <div className="p-4">
-                                    <EditorContent
-                                        editor={editor}
-                                        className="prose prose-sm max-w-none dark:prose-invert focus:outline-none"
-                                    />
-                                </div>
-                            </div>
                         </div>
+                    </div>
 
-                        {/* Sağ Kolon - Ayarlar */}
-                        <div className="space-y-6">
-                            {/* Durum ve Görünürlük */}
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                                    <h2 className="text-lg font-medium text-gray-900 dark:text-white">
-                                        Durum ve Görünürlük
-                                    </h2>
-                                </div>
-                                <div className="p-4">
-                                    <div className="space-y-4">
-                                        {/* Durum */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                Durum
-                                            </label>
-                                            <div className="space-y-2">
-                                                <label className="inline-flex items-center">
-                                                    <input
-                                                        type="radio"
-                                                        value="draft"
-                                                        checked={formData.status === 'draft'}
-                                                        onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as 'draft' | 'published' }))}
-                                                        className="border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
-                                                    />
-                                                    <span className="ml-2 text-gray-700 dark:text-gray-300">Taslak</span>
+                    {/* Sağ Panel - Ayarlar */}
+                    <div className="lg:col-span-1">
+                        <div className="sticky top-24 space-y-4">
+                            {/* Yazı Ayarları Accordion */}
+                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+                                <Accordion defaultOpen="url">
+                                    {/* URL Ayarları */}
+                                    <AccordionItem id="url" icon={<FaLink />} title="URL Ayarları">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Kalıcı Bağlantı
                                                 </label>
-                                                <br />
-                                                <label className="inline-flex items-center">
-                                                    <input
-                                                        type="radio"
-                                                        value="published"
-                                                        checked={formData.status === 'published'}
-                                                        onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as 'draft' | 'published' }))}
-                                                        className="border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
-                                                    />
-                                                    <span className="ml-2 text-gray-700 dark:text-gray-300">Yayında</span>
-                                                </label>
+                                                <div className="flex gap-2">
+                                                    <div className="flex-1 relative">
+                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                                                            /blog/
+                                                        </span>
+                                                        <input
+                                                            type="text"
+                                                            value={formData.slug}
+                                                            onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                                                            className="pl-14 w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm"
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        onClick={() => {
+                                                            const newSlug = formData.title
+                                                                .toLowerCase()
+                                                                .replace(/[^a-z0-9]+/g, '-')
+                                                                .replace(/^-+|-+$/g, '')
+                                                            setFormData(prev => ({ ...prev, slug: newSlug }))
+                                                        }}
+                                                        className="shrink-0 px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-medium"
+                                                    >
+                                                        URL Oluştur
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
+                                    </AccordionItem>
 
-                                        {/* URL */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                URL
-                                            </label>
-                                            <div className="flex items-center gap-2">
+                                    {/* Kategoriler */}
+                                    <AccordionItem id="categories" icon={<FaTags />} title="Kategoriler">
+                                        <div className="max-h-48 overflow-y-auto custom-scrollbar">
+                                            {renderCategoryTree(categories)}
+                                        </div>
+                                    </AccordionItem>
+
+                                    {/* Öne Çıkan Görsel */}
+                                    <AccordionItem id="featured" icon={<FaImage />} title="Öne Çıkan Görsel">
+                                        <div className="space-y-4">
+                                            <div className="flex gap-2">
                                                 <input
                                                     type="text"
-                                                    value={formData.slug}
-                                                    onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                                                    placeholder="url-adresi"
-                                                    className="block w-full rounded-md border border-gray-300 dark:border-gray-600 
-                                                            bg-white dark:bg-gray-700 py-2 px-3 shadow-sm focus:border-primary 
-                                                            focus:outline-none focus:ring-1 focus:ring-primary dark:text-white text-sm font-mono"
+                                                    value={formData.featured_image}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, featured_image: e.target.value }))}
+                                                    className="flex-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm"
+                                                    placeholder="Görsel URL'si"
                                                 />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        const newSlug = formData.title
-                                                            .toLowerCase()
-                                                            .replace(/[^a-z0-9]+/g, '-')
-                                                            .replace(/(^-|-$)/g, '')
-                                                        setFormData(prev => ({ ...prev, slug: newSlug }))
-                                                    }}
-                                                    className="flex-shrink-0 inline-flex items-center px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 
-                                                            shadow-sm text-xs font-medium rounded text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 
-                                                            hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
-                                                            focus:ring-primary transition-colors"
-                                                >
-                                                    Başlıktan Oluştur
+                                                <button className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
+                                                    <FaImage size={16} />
                                                 </button>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Kategoriler */}
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                                    <h2 className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                                        <FaTags className="h-5 w-5 text-gray-400" />
-                                        Kategoriler
-                                    </h2>
-                                </div>
-                                <div className="p-4">
-                                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                                        {renderCategoryTree(categories)}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Öne Çıkan Görsel */}
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                                    <h2 className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                                        <FaImage className="h-5 w-5 text-gray-400" />
-                                        Öne Çıkan Görsel
-                                    </h2>
-                                </div>
-                                <div className="p-4">
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <input
-                                                type="text"
-                                                value={formData.featured_image}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, featured_image: e.target.value }))}
-                                                placeholder="Görsel URL'si"
-                                                className="block w-full rounded-md border border-gray-300 dark:border-gray-600 
-                                                         bg-white dark:bg-gray-700 py-2 px-3 shadow-sm focus:border-primary 
-                                                         focus:outline-none focus:ring-1 focus:ring-primary dark:text-white text-sm"
-                                            />
                                             {formData.featured_image && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setFormData(prev => ({ ...prev, featured_image: '' }))}
-                                                    className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-                                                >
-                                                    <FaTimes className="h-5 w-5" />
-                                                </button>
+                                                <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
+                                                    <img
+                                                        src={formData.featured_image}
+                                                        alt="Öne çıkan görsel"
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    <button
+                                                        onClick={() => setFormData(prev => ({ ...prev, featured_image: '' }))}
+                                                        className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-black/75"
+                                                    >
+                                                        <FaTimes size={12} />
+                                                    </button>
+                                                </div>
                                             )}
                                         </div>
-                                        {formData.featured_image && (
-                                            <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
-                                                <img
-                                                    src={formData.featured_image}
-                                                    alt="Öne çıkan görsel önizleme"
-                                                    className="w-full h-full object-cover"
+                                    </AccordionItem>
+
+                                    {/* SEO Ayarları */}
+                                    <AccordionItem id="seo" icon={<FaCog />} title="SEO Ayarları">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Meta Başlık
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={formData.meta_title}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, meta_title: e.target.value }))}
+                                                    className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm"
+                                                    placeholder="SEO başlığı..."
                                                 />
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Meta Açıklama
+                                                </label>
+                                                <textarea
+                                                    value={formData.meta_description}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
+                                                    rows={3}
+                                                    className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm"
+                                                    placeholder="SEO açıklaması..."
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Anahtar Kelimeler
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={formData.meta_keywords}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, meta_keywords: e.target.value }))}
+                                                    className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm"
+                                                    placeholder="Virgülle ayırarak yazın..."
+                                                />
+                                            </div>
+                                            <div className="flex items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.is_indexable}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, is_indexable: e.target.checked }))}
+                                                    className="rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600"
+                                                />
+                                                <label className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                                                    Arama motorlarında indekslenebilir
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </AccordionItem>
 
-                            {/* Özet */}
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                                    <h2 className="text-lg font-medium text-gray-900 dark:text-white">
-                                        Özet
-                                    </h2>
-                                </div>
-                                <div className="p-4">
-                                    <textarea
-                                        value={formData.excerpt}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
-                                        rows={3}
-                                        className="w-full rounded-md border border-gray-300 dark:border-gray-600 
-                                                 bg-white dark:bg-gray-700 py-2 px-3 shadow-sm focus:border-primary 
-                                                 focus:outline-none focus:ring-1 focus:ring-primary dark:text-white text-sm"
-                                        placeholder="Yazının kısa bir özeti..."
-                                    />
-                                </div>
-                            </div>
-
-                            {/* SEO Ayarları */}
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                                    <h2 className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                                        <FaCog className="h-5 w-5 text-gray-400" />
-                                        SEO Ayarları
-                                    </h2>
-                                </div>
-                                <div className="p-4 space-y-4">
-                                    {/* Meta Başlık */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Meta Başlık
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={formData.meta_title}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, meta_title: e.target.value }))}
-                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 
-                                                     bg-white dark:bg-gray-700 py-2 px-3 shadow-sm focus:border-primary 
-                                                     focus:outline-none focus:ring-1 focus:ring-primary dark:text-white text-sm"
-                                        />
-                                    </div>
-
-                                    {/* Meta Açıklama */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Meta Açıklama
-                                        </label>
-                                        <textarea
-                                            value={formData.meta_description}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
-                                            rows={2}
-                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 
-                                                     bg-white dark:bg-gray-700 py-2 px-3 shadow-sm focus:border-primary 
-                                                     focus:outline-none focus:ring-1 focus:ring-primary dark:text-white text-sm"
-                                        />
-                                    </div>
-
-                                    {/* Meta Anahtar Kelimeler */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Meta Anahtar Kelimeler
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={formData.meta_keywords}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, meta_keywords: e.target.value }))}
-                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 
-                                                     bg-white dark:bg-gray-700 py-2 px-3 shadow-sm focus:border-primary 
-                                                     focus:outline-none focus:ring-1 focus:ring-primary dark:text-white text-sm"
-                                            placeholder="Virgülle ayırarak yazın"
-                                        />
-                                    </div>
-
-                                    {/* Canonical URL */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Canonical URL
-                                        </label>
-                                        <input
-                                            type="url"
-                                            value={formData.canonical_url}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, canonical_url: e.target.value }))}
-                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 
-                                                     bg-white dark:bg-gray-700 py-2 px-3 shadow-sm focus:border-primary 
-                                                     focus:outline-none focus:ring-1 focus:ring-primary dark:text-white text-sm"
-                                        />
-                                    </div>
-
-                                    {/* İndekslenebilir */}
-                                    <div className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.is_indexable}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, is_indexable: e.target.checked }))}
-                                            className="rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
-                                        />
-                                        <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            Arama motorlarında indekslenebilir
-                                        </label>
-                                    </div>
-                                </div>
+                                    {/* SEO Analiz - Yeni Eklenen */}
+                                    <AccordionItem id="seo-analysis" icon={<FaChartBar />} title="SEO Analizi">
+                                        <SEOAnalysis content={formData.content} formData={formData} />
+                                    </AccordionItem>
+                                </Accordion>
                             </div>
                         </div>
                     </div>
-                </form>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// Editor Toolbar Komponenti
+function EditorToolbar({ editor }: { editor: any }) {
+    if (!editor) return null;
+
+    // State'leri buraya taşıyalım
+    const [colorPickerOpen, setColorPickerOpen] = useState(false);
+    const [colorPickerPosition, setColorPickerPosition] = useState({ top: 0, left: 0, buttonWidth: 0, buttonHeight: 0 });
+    const colorButtonRef = useRef<HTMLButtonElement>(null);
+
+    const addImage = () => {
+        const url = window.prompt('Görsel URL\'si girin:')
+        if (url) {
+            editor.chain().setImage({ src: url }).run()
+        }
+    }
+
+    const addLink = () => {
+        const url = window.prompt('Link URL\'si girin:')
+        if (url) {
+            editor.chain().setLink({ href: url }).run()
+        }
+    }
+
+    const addTable = () => {
+        editor.chain().insertTable({ rows: 3, cols: 3 }).run()
+    }
+
+    return (
+        <div className="flex items-center gap-2 p-2 min-w-max">
+            {/* Geri/İleri */}
+            <div className="flex gap-1 border-r border-gray-200 dark:border-gray-700 pr-2">
+                <ToolbarButton
+                    onClick={() => editor.chain().undo().run()}
+                    disabled={!editor.can().undo()}
+                    icon={<FaUndo size={14} />}
+                    tooltip="Geri Al"
+                />
+                <ToolbarButton
+                    onClick={() => editor.chain().redo().run()}
+                    disabled={!editor.can().redo()}
+                    icon={<FaRedo size={14} />}
+                    tooltip="İleri Al"
+                />
+            </div>
+
+            {/* Başlık Seçici */}
+            <select
+                onChange={(e) => {
+                    const level = parseInt(e.target.value)
+                    level === 0
+                        ? editor.chain().setParagraph().run()
+                        : editor.chain().toggleHeading({ level }).run()
+                }}
+                className="h-8 px-2 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm mr-2"
+                value={
+                    editor.isActive('heading', { level: 1 }) ? '1' :
+                        editor.isActive('heading', { level: 2 }) ? '2' :
+                            editor.isActive('heading', { level: 3 }) ? '3' : '0'
+                }
+            >
+                <option value="0">Normal</option>
+                <option value="1">Başlık 1</option>
+                <option value="2">Başlık 2</option>
+                <option value="3">Başlık 3</option>
+            </select>
+
+            {/* Metin Biçimlendirme */}
+            <div className="flex gap-1 mr-2 border-r border-gray-200 dark:border-gray-700 pr-2">
+                <ToolbarButton
+                    onClick={() => editor.chain().toggleBold().run()}
+                    active={editor.isActive('bold')}
+                    icon={<FaBold size={14} />}
+                    tooltip="Kalın"
+                />
+                <ToolbarButton
+                    onClick={() => editor.chain().toggleItalic().run()}
+                    active={editor.isActive('italic')}
+                    icon={<FaItalic size={14} />}
+                    tooltip="İtalik"
+                />
+                <ToolbarButton
+                    onClick={() => editor.chain().toggleUnderline().run()}
+                    active={editor.isActive('underline')}
+                    icon={<FaUnderline size={14} />}
+                    tooltip="Altı Çizili"
+                />
+                <ToolbarButton
+                    onClick={() => editor.chain().toggleStrike().run()}
+                    active={editor.isActive('strike')}
+                    icon={<FaStrikethrough size={14} />}
+                    tooltip="Üstü Çizili"
+                />
+            </div>
+
+            {/* Hizalama */}
+            <div className="flex gap-1 mr-2 border-r border-gray-200 dark:border-gray-700 pr-2">
+                <ToolbarButton
+                    onClick={() => editor.chain().setTextAlign('left').run()}
+                    active={editor.isActive({ textAlign: 'left' })}
+                    icon={<FaAlignLeft size={14} />}
+                    tooltip="Sola Hizala"
+                />
+                <ToolbarButton
+                    onClick={() => editor.chain().setTextAlign('center').run()}
+                    active={editor.isActive({ textAlign: 'center' })}
+                    icon={<FaAlignCenter size={14} />}
+                    tooltip="Ortala"
+                />
+                <ToolbarButton
+                    onClick={() => editor.chain().setTextAlign('right').run()}
+                    active={editor.isActive({ textAlign: 'right' })}
+                    icon={<FaAlignRight size={14} />}
+                    tooltip="Sağa Hizala"
+                />
+                <ToolbarButton
+                    onClick={() => editor.chain().setTextAlign('justify').run()}
+                    active={editor.isActive({ textAlign: 'justify' })}
+                    icon={<FaAlignJustify size={14} />}
+                    tooltip="İki Yana Yasla"
+                />
+            </div>
+
+            {/* Listeler */}
+            <div className="flex gap-1 mr-2 border-r border-gray-200 dark:border-gray-700 pr-2">
+                <ToolbarButton
+                    onClick={() => editor.chain().toggleBulletList().run()}
+                    active={editor.isActive('bulletList')}
+                    icon={<FaListUl size={14} />}
+                    tooltip="Madde İşaretli Liste"
+                />
+                <ToolbarButton
+                    onClick={() => editor.chain().toggleOrderedList().run()}
+                    active={editor.isActive('orderedList')}
+                    icon={<FaListOl size={14} />}
+                    tooltip="Numaralı Liste"
+                />
+            </div>
+
+            {/* Font Ayarları */}
+            <div className="flex gap-1 mr-2 border-r border-gray-200 dark:border-gray-700 pr-2">
+                {/* Font Ailesi */}
+                <select
+                    onChange={(e) => editor.chain().setFontFamily(e.target.value).run()}
+                    value={editor.getAttributes('textStyle').fontFamily || 'Inter'}
+                    className="h-8 px-2 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
+                >
+                    {FONT_FAMILIES.map(font => (
+                        <option key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                            {font.label}
+                        </option>
+                    ))}
+                </select>
+
+                {/* Font Boyutu */}
+                <div className="flex items-center gap-1">
+                    <select
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === 'custom') {
+                                const size = prompt('Font boyutu girin (örn: 22):');
+                                if (size) {
+                                    if (/^\d$/.test(size)) {
+                                        editor.chain().setFontSize(size + 'px').run();
+                                    } else {
+                                        toast.error('Geçerli bir piksel değeri girin (örn: 22px)');
+                                    }
+                                }
+                            } else {
+                                editor.chain().setFontSize(value).run();
+                            }
+                        }}
+                        value={editor.getAttributes('textStyle').fontSize || ''}
+                        className="h-8 px-2 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
+                    >
+                        {FONT_SIZES.map(size => (
+                            <option key={size.value} value={size.value}>
+                                {size.label}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Font Boyutu Temizle */}
+                    <button
+                        onClick={() => editor.chain().unsetFontSize().run()}
+                        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        title="Font Boyutunu Sıfırla"
+                    >
+                        <FaTimes size={14} />
+                    </button>
+                </div>
+            </div>
+
+            {/* Renk Seçici */}
+            <div className="relative group">
+                <button
+                    ref={colorButtonRef}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        const rect = colorButtonRef.current?.getBoundingClientRect();
+                        if (rect) {
+                            setColorPickerPosition({
+                                top: rect.bottom + window.scrollY,
+                                left: rect.left + window.scrollX,
+                                buttonWidth: rect.width,
+                                buttonHeight: rect.height
+                            });
+                            setColorPickerOpen(!colorPickerOpen);
+                        }
+                    }}
+                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
+                    title="Yazı Rengi"
+                >
+                    <FaPalette size={14} />
+                    <div
+                        className="w-4 h-4 rounded-full border border-gray-200 dark:border-gray-600"
+                        style={{
+                            backgroundColor: editor.getAttributes('textStyle').color || '#000000',
+                            borderColor: editor.getAttributes('textStyle').color === '#FFFFFF' ? '#718096' : 'transparent'
+                        }}
+                    />
+                </button>
+                <ColorPicker
+                    isOpen={colorPickerOpen}
+                    onClose={() => setColorPickerOpen(false)}
+                    position={colorPickerPosition}
+                    editor={editor}
+                    onColorSelect={(color) => {
+                        editor.chain().focus().setColor(color).run();
+                        setColorPickerOpen(false);
+                    }}
+                />
+            </div>
+
+            {/* Ekstra Özellikler */}
+            <div className="flex gap-1">
+                <ToolbarButton
+                    onClick={() => editor.chain().toggleBlockquote().run()}
+                    active={editor.isActive('blockquote')}
+                    icon={<FaQuoteRight size={14} />}
+                    tooltip="Alıntı"
+                />
+                <ToolbarButton
+                    onClick={addLink}
+                    active={editor.isActive('link')}
+                    icon={<FaLink size={14} />}
+                    tooltip="Link Ekle"
+                />
+                {editor.isActive('link') && (
+                    <ToolbarButton
+                        onClick={(e) => {
+                            e.preventDefault();
+                            editor.chain().unsetLink().run()
+                        }}
+                        icon={<FaUnlink size={14} />}
+                        tooltip="Linki Kaldır"
+                    />
+                )}
+                <ToolbarButton
+                    onClick={addImage}
+                    icon={<FaImage size={14} />}
+                    tooltip="Görsel Ekle"
+                />
+                <ToolbarButton
+                    onClick={addTable}
+                    icon={<FaTable size={14} />}
+                    tooltip="Tablo Ekle"
+                />
+                <ToolbarButton
+                    onClick={(e) => {
+                        e.preventDefault();
+                        editor.chain().toggleCode().run()
+                    }}
+                    active={editor.isActive('code')}
+                    icon={<FaCode size={14} />}
+                    tooltip="Kod"
+                />
             </div>
         </div>
     )
+}
+
+// Toolbar Buton Komponenti
+function ToolbarButton({
+    onClick,
+    icon,
+    active = false,
+    disabled = false,
+    tooltip
+}: {
+    onClick: () => void
+    icon: React.ReactNode
+    active?: boolean
+    disabled?: boolean
+    tooltip: string
+}) {
+    return (
+        <button
+            onClick={(e) => {
+                e.preventDefault(); // Scroll'u engelle
+                onClick();
+            }}
+            disabled={disabled}
+            className={`
+                p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 
+                transition-colors relative group
+                ${active ? 'bg-gray-100 dark:bg-gray-700' : ''}
+                ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+            `}
+            title={tooltip}
+        >
+            <span className="text-gray-600 dark:text-gray-300">
+                {icon}
+            </span>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs 
+                           text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 
+                           transition-opacity whitespace-nowrap pointer-events-none">
+                {tooltip}
+            </div>
+        </button>
+    )
+}
+
+// Accordion Komponentleri
+function Accordion({ children, defaultOpen = '' }: { children: React.ReactNode, defaultOpen?: string }) {
+    const [openItem, setOpenItem] = useState(defaultOpen);
+
+    return (
+        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            {React.Children.map(children, (child: React.ReactNode) => {
+                if (React.isValidElement(child)) {
+                    if ((child as any).props.id) {
+                        return React.cloneElement(child, {
+                            isOpen: openItem === (child as any).props.id,
+                            onToggle: () => setOpenItem(openItem === (child as any).props.id ? '' : (child as any).props.id)
+                        });
+                    }
+                }
+                return child;
+            })}
+        </div>
+    );
+}
+
+function AccordionItem({ id, icon, title, children, isOpen, onToggle }: { id: string, icon: React.ReactNode, title: string, children?: React.ReactNode, isOpen?: boolean, onToggle?: () => void }) {
+    return (
+        <div>
+            <button
+                onClick={onToggle}
+                className="flex items-center justify-between w-full p-4 text-left"
+            >
+                <div className="flex items-center gap-2">
+                    <span className="text-gray-400">{icon}</span>
+                    <span className="font-medium">{title}</span>
+                </div>
+                <FaChevronDown
+                    className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                />
+            </button>
+            {isOpen && (
+                <div className="p-4 pt-0">
+                    {children}
+                </div>
+            )}
+        </div>
+    );
 } 

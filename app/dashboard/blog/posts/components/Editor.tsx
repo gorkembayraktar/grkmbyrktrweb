@@ -13,7 +13,6 @@ import TextAlign from '@tiptap/extension-text-align'
 import FontFamily from '@tiptap/extension-font-family'
 import Highlight from '@tiptap/extension-highlight'
 import Typography from '@tiptap/extension-typography'
-import FontSize from '@tiptap/extension-font-size'
 import { EditorToolbar } from './EditorToolbar'
 import { useEffect, useRef } from 'react'
 
@@ -52,9 +51,6 @@ export function Editor({ content, onChange }: EditorProps) {
                 types: ['textStyle']
             }),
             FontFamily.configure({
-                types: ['textStyle']
-            }),
-            FontSize.configure({
                 types: ['textStyle']
             }),
             TextAlign.configure({

@@ -10,6 +10,7 @@ import { Editor } from '../components/Editor'
 import { PostFormData, Category } from '../types'
 import { loadCategories, updatePostCategories } from '../utils/categories'
 import { PostSettings } from '../components/settings/PostSettings'
+import useUserStore from '@/app/store/userStore'
 
 export default function NewPostPage() {
     const router = useRouter()
@@ -29,6 +30,8 @@ export default function NewPostPage() {
         is_indexable: true,
         canonical_url: ''
     })
+
+    const { user } = useUserStore()
 
     const supabase = createClient()
 
@@ -78,7 +81,10 @@ export default function NewPostPage() {
         setIsLoading(true)
 
         try {
-            // Yazıyı oluştur
+            // Get current user
+            if (!user) throw new Error('User not found')
+
+            // Create post
             const { data: post, error: postError } = await supabase
                 .from('posts')
                 .insert({
@@ -95,7 +101,8 @@ export default function NewPostPage() {
                     canonical_url: formData.canonical_url,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString(),
-                    published_at: formData.status === 'published' ? new Date().toISOString() : null
+                    published_at: formData.status === 'published' ? new Date().toISOString() : null,
+                    author_id: user.id
                 })
                 .select()
                 .single()
@@ -127,7 +134,7 @@ export default function NewPostPage() {
             <div className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                 <div className="px-6 py-4">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-1 items-center gap-4">
                             <button
                                 onClick={() => router.push('/dashboard/blog/posts')}
                                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -139,7 +146,7 @@ export default function NewPostPage() {
                                 value={formData.title}
                                 onChange={(e) => handleFieldChange('title', e.target.value)}
                                 placeholder="Yazı başlığı..."
-                                className="text-xl font-medium bg-transparent border-0 outline-none focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
+                                className="w-full text-xl font-medium bg-transparent border-0 outline-none focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
                             />
                         </div>
                         <div className="flex items-center gap-3">

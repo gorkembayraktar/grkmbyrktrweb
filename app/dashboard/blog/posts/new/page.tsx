@@ -11,6 +11,7 @@ import { PostFormData, Category } from '../types'
 import { loadCategories, updatePostCategories } from '../utils/categories'
 import { PostSettings } from '../components/settings/PostSettings'
 import useUserStore from '@/app/store/userStore'
+import { generateSlug } from '@/app/utils/slug'
 
 export default function NewPostPage() {
     const router = useRouter()
@@ -60,10 +61,7 @@ export default function NewPostPage() {
     // Başlıktan otomatik slug oluştur
     useEffect(() => {
         if (formData.title) {
-            const slug = formData.title
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/(^-|-$)/g, '')
+            const slug = generateSlug(formData.title)
 
             setFormData(prev => ({ ...prev, slug }))
         }
@@ -146,6 +144,7 @@ export default function NewPostPage() {
                                 value={formData.title}
                                 onChange={(e) => handleFieldChange('title', e.target.value)}
                                 placeholder="Yazı başlığı..."
+                                style={{ width: '100%' }}
                                 className="w-full text-xl font-medium bg-transparent border-0 outline-none focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
                             />
                         </div>

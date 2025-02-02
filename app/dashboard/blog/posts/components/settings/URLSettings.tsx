@@ -1,6 +1,7 @@
 import { FaLink } from 'react-icons/fa'
 import { AccordionItem } from '../Accordion'
 import { useState } from 'react';
+import { generateSlug } from '@/app/utils/slug';
 
 interface URLSettingsProps {
     slug: string;
@@ -33,11 +34,8 @@ export function URLSettings({ slug, title, onChange }: URLSettingsProps) {
                         </div>
                         <button
                             onClick={() => {
-                                const newSlug = title
-                                    .toLowerCase()
-                                    .replace(/[^a-z0-9]+/g, '-')
-                                    .replace(/^-+|-+$/g, '')
-                                onChange(newSlug)
+                                const newSlug = generateSlug(title);
+                                onChange(newSlug);
                             }}
                             className="shrink-0 px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-medium"
                         >

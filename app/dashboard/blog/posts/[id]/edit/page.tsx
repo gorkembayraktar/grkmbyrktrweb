@@ -10,6 +10,7 @@ import { Editor } from '../../components/Editor'
 import { PostFormData, Category } from '../../types'
 import { loadCategories, updatePostCategories } from '../../utils/categories'
 import { PostSettings } from '../../components/settings/PostSettings'
+import { generateSlug } from '@/app/utils/slug'
 
 interface PageParams {
     id: string;
@@ -102,17 +103,6 @@ export default function EditPostPage({ params }: { params: Promise<PageParams> }
         fetchCategories()
     }, [])
 
-    // Başlıktan otomatik slug oluştur
-    useEffect(() => {
-        if (formData.title) {
-            const slug = formData.title
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/(^-|-$)/g, '')
-
-            setFormData(prev => ({ ...prev, slug }))
-        }
-    }, [formData.title])
 
     // Başlıktan otomatik meta title oluştur
     useEffect(() => {
@@ -224,6 +214,7 @@ export default function EditPostPage({ params }: { params: Promise<PageParams> }
                                 type="text"
                                 value={formData.title}
                                 onChange={(e) => handleFieldChange('title', e.target.value)}
+                                style={{ width: '100%' }}
                                 placeholder="Yazı başlığı..."
                                 className="w-fulltext-xl font-medium bg-transparent border-0 outline-none focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
                             />

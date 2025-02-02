@@ -14,6 +14,7 @@ export interface PostFormData {
     canonical_url: string;
     categoriesWith?: Category[];
     created_at?: string;
+    updated_at?: string;
     author?: {
         id: string;
         full_name: string;

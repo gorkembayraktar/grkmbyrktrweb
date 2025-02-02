@@ -2,46 +2,12 @@ import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 import BlogContent from './components/BlogContent'
 import Whatsapp from '@/app/modules/Whatsapp'
-import { PageParams } from '@supabase/supabase-js'
 import { getSettings } from '@/app/utils/settings'
 import { getPostById, getRecentPosts, getRelatedPosts } from '@/app/utils/posts'
 import ScrollToTop from '@/app/modules/ScrollToTop'
 import { Metadata } from 'next'
 
-// Örnek son yazılar verisi
-const recentPosts = [
-    {
-        title: "SEO Optimizasyonu İpuçları",
-        date: "10 Mart 2024",
-        slug: "seo-optimizasyonu-ipuclari"
-    },
-    {
-        title: "Veritabanı Performans Optimizasyonu",
-        date: "5 Mart 2024",
-        slug: "veritabani-performans-optimizasyonu"
-    },
-    {
-        title: "Modern Web Teknolojileri",
-        date: "15 Mart 2024",
-        slug: "modern-web-teknolojileri"
-    }
-]
 
-// İlgili yazılar verisi
-const relatedPosts = [
-    {
-        title: "React Hooks Kullanım Rehberi",
-        excerpt: "React hooks ile fonksiyonel component'lerde state yönetimi ve yaşam döngüsü.",
-        slug: "react-hooks-kullanim-rehberi",
-        category: "React"
-    },
-    {
-        title: "Next.js 13 Yenilikleri",
-        excerpt: "Next.js 13 ile gelen yeni özellikler ve app directory yapısı.",
-        slug: "nextjs-13-yenilikleri",
-        category: "Next.js"
-    }
-]
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: { params: Promise<{ slug?: string }> }): Promise<Metadata> {

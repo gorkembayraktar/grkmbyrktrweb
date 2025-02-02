@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { FaClock, FaTag } from 'react-icons/fa'
 import type { FC } from 'react'
 import { Category, PostFormData } from '../dashboard/blog/posts/types'
+import Link from 'next/link'
 
 const blogPosts = [
     {
@@ -118,9 +119,12 @@ const Blog: FC<{ posts: PostFormData[] }> = ({ posts }) => {
                                     </div>
 
                                     {/* Title */}
-                                    <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
-                                        {post.title.slice(0, 30) + (post.title.length > 30 ? '...' : '')}
-                                    </h3>
+                                    <Link href={`/blog/${post.slug}`}>
+                                        <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
+                                            {post.title.slice(0, 30) + (post.title.length > 30 ? '...' : '')}
+                                        </h3>
+                                    </Link>
+
 
                                     {/* Excerpt */}
                                     <p className="text-gray-400">

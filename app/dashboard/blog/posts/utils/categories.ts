@@ -7,7 +7,12 @@ export async function loadCategories() {
     try {
         const { data, error } = await supabase
             .from('categories')
-            .select('id, name, parent_id')
+            .select(`
+                id,
+                name,
+                slug,
+                parent_id
+            `)
             .order('name')
 
         if (error) throw error

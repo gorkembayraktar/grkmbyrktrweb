@@ -14,10 +14,16 @@ export interface PostFormData {
     canonical_url: string;
     categoriesWith?: Category[];
     created_at?: string;
+    author?: {
+        id: string;
+        full_name: string;
+        avatar_url: string;
+    };
 }
 
 export interface Category {
     id: string;
+    slug: string;
     name: string;
     parent_id: string | null;
     children?: Category[];
